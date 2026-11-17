@@ -1,0 +1,45 @@
+{
+  "name": "fluctseed",
+  "displayName": "Fluctseed AI Engineering Platform",
+  "version": "2.1.0",
+  "description": "Spec-Driven and Empirical AI Engineering Platform across /setup, /brainstorm, /new-track, /implement, /review, /status, and /revert with zero-context design verification and runtime proof.",
+  "author": {
+    "name": "Fluctseed AI Platform Architecture Team"
+  },
+  "license": "Apache-2.0",
+  "logo": "assets/icon.svg",
+  "suggestedPrompts": [
+    "/setup Initialize this repository with project context and directory architecture contracts.",
+    "/brainstorm Stress-test a new feature concept across 7 fresh-context lenses.",
+    "/new-track Draft spec.md and plan.md and run zero-context design verification."
+  ],
+  "extensions": {
+    "com.openai": {
+      "requires_local_executor": true,
+      "interface": {
+        "displayName": "Fluctseed AI Engineering Platform",
+        "shortDescription": "Spec-driven lifecycle with zero-context design audits and empirical execution rigor",
+        "longDescription": "Provides a stateful track lifecycle (/setup, /brainstorm, /new-track, /implement, /review, /status, /revert) with zero-context subagent design verification, Stage 3 Human Gate locking, and empirical implementation, root-cause debugging, and verification discipline.",
+        "developerName": "Fluctseed AI Platform",
+        "brandColor": "#1B6EF3",
+        "category": "Developer Tools",
+        "capabilities": [
+          "Project initialization and directory architecture contracts (/setup)",
+          "7-lens ideation and hypothesis stress-testing (/brainstorm)",
+          "Specification drafting and zero-context subagent cross-verification (/new-track)",
+          "Disciplined implementation with playbooks, behavioral TDD, and decision trails (/implement)",
+          "Runtime verification, spec-to-code drift checks, code review, and PR creation (/review)"
+        ],
+        "defaultPrompt": [
+          "/setup Initialize this repository with project context and directory architecture contracts.",
+          "/brainstorm Stress-test a new feature concept across 7 fresh-context lenses.",
+          "/new-track Plan a new feature and verify it with fresh-context reviewers.",
+          "/implement Execute the approved track plan under empirical engineering discipline."
+        ],
+        "composerIcon": "./assets/icon.svg",
+        "logo": "./assets/icon.svg"
+      }
+    }
+  },
+  "repository": "https://github.com/FluctSeed/plugins"
+}

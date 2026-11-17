@@ -1,0 +1,11 @@
+{
+  "name": "fluctseed",
+  "plugins": [
+    {
+      "name": "fluctseed",
+      "description": "Spec-Driven and Empirical AI Engineering Platform",
+      "version": "2.1.0",
+      "path": "../../"
+    }
+  ]
+}

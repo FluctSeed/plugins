@@ -1,0 +1,14 @@
+{
+  "name": "fluctseed-marketplace",
+  "owner": {
+    "name": "Fluctseed AI Platform"
+  },
+  "plugins": [
+    {
+      "name": "fluctseed",
+      "description": "Spec-Driven and Empirical AI Engineering Platform",
+      "version": "2.1.0",
+      "source": "./"
+    }
+  ]
+}
