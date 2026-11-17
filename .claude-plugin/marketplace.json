@@ -1,12 +1,16 @@
 {
-  "name": "fluctseed-marketplace",
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "fluctseed",
+  "version": "2.1.0",
+  "description": "Fluctseed AI Engineering Platform Marketplace",
   "owner": {
-    "name": "Fluctseed AI Platform"
+    "name": "FluctSeed",
+    "email": "support@fluctseed.io"
   },
   "plugins": [
     {
       "name": "fluctseed",
-      "description": "Spec-Driven and Empirical AI Engineering Platform",
+      "description": "Spec-Driven and Empirical AI Engineering Platform across /setup, /brainstorm, /new-track, /implement, /review, /status, and /revert",
       "version": "2.1.0",
       "source": "./"
     }

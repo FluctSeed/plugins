@@ -1,11 +1,18 @@
 {
   "name": "fluctseed",
+  "interface": {
+    "displayName": "Fluctseed AI Engineering Platform"
+  },
   "plugins": [
     {
       "name": "fluctseed",
-      "description": "Spec-Driven and Empirical AI Engineering Platform",
+      "description": "Spec-Driven and Empirical AI Engineering Platform across /setup, /brainstorm, /new-track, /implement, /review, /status, and /revert",
       "version": "2.1.0",
-      "path": "../../"
+      "source": "./",
+      "policy": {
+        "installation": "AVAILABLE"
+      },
+      "category": "Developer Tools"
     }
   ]
 }

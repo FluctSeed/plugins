@@ -2,7 +2,7 @@
   "name": "fluctseed",
   "displayName": "Fluctseed AI Engineering Platform",
   "version": "2.1.0",
-  "description": "Spec-Driven and Empirical AI Engineering Platform across /setup, /new-track, /implement, /review, /status, and /revert.",
+  "description": "Spec-Driven and Empirical AI Engineering Platform across /setup, /brainstorm, /new-track, /implement, /review, /status, and /revert.",
   "author": {
     "name": "Fluctseed AI Platform Architecture Team"
   },
@@ -12,22 +12,25 @@
     "design-review",
     "empirical-engineering",
     "tdd",
-    "code-review"
+    "code-review",
+    "agent-skills"
   ],
-  "icon": "./.claude-plugin/icon.png",
+  "skills": "./skills",
+  "rules": "./rules",
+  "icon": "./assets/icon.svg",
   "agents": [
-    "./.claude-plugin/agents/bootstrap_orchestrator.md",
-    "./.claude-plugin/agents/codebase_details.md",
-    "./.claude-plugin/agents/comprehension.md",
-    "./.claude-plugin/agents/design_critic.md",
-    "./.claude-plugin/agents/implementation_readiness.md",
-    "./.claude-plugin/agents/inventive_catalyst.md",
-    "./.claude-plugin/agents/structural.md",
-    "./.claude-plugin/agents/style.md",
-    "./.claude-plugin/agents/synthesizer.md",
-    "./.claude-plugin/agents/zoom_out.md",
-    "./.claude-plugin/agents/implementer.md",
-    "./.claude-plugin/agents/comment_auditor.md"
+    "./agents/bootstrap_orchestrator.md",
+    "./agents/codebase_details.md",
+    "./agents/comprehension.md",
+    "./agents/design_critic.md",
+    "./agents/implementation_readiness.md",
+    "./agents/inventive_catalyst.md",
+    "./agents/structural.md",
+    "./agents/style.md",
+    "./agents/synthesizer.md",
+    "./agents/zoom_out.md",
+    "./agents/implementer.md",
+    "./agents/comment_auditor.md"
   ],
   "repository": "https://github.com/FluctSeed/plugins"
 }
