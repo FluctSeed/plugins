@@ -2,7 +2,7 @@
 name: setup
 description: Scaffolds the project context in conductor/ (product definition, tech stack, styleguides, security policy, and workflow standard) and bootstraps directory-level README.md architecture contracts. Use whenever a project needs to be initialized or if conductor/index.md is missing.
 metadata:
-  version: "2.1"
+  version: "0.1.0"
 ---
 
 # Project Setup Skill (`/setup`)

@@ -1,7 +1,7 @@
 {
   "name": "fluctseed",
   "displayName": "Fluctseed AI Engineering Platform",
-  "version": "2.1.0",
+  "version": "0.1.0",
   "description": "Spec-Driven and Empirical AI Engineering Platform across /setup, /brainstorm, /new-track, /implement, /review, /status, and /revert with zero-context design verification and runtime proof.",
   "author": {
     "name": "Fluctseed AI Platform Architecture Team"

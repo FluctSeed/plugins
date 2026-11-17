@@ -145,7 +145,7 @@ if [[ "$CHECK_ONLY" == "false" ]]; then
     {
       "name": "fluctseed",
       "description": "Spec-Driven and Empirical AI Engineering Platform",
-      "version": "2.1.0",
+      "version": "0.1.0",
       "path": "../../"
     }
   ]
@@ -266,7 +266,7 @@ tools.append({
 })
 
 with open(out_path, "w", encoding="utf-8") as f:
-    json.dump({"platform": "grok-cli-api", "version": "2.1.0", "tools": tools}, f, indent=2)
+    json.dump({"platform": "grok-cli-api", "version": "0.1.0", "tools": tools}, f, indent=2)
     f.write("\n")
 PYEOF
 

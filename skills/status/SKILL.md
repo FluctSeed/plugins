@@ -2,7 +2,7 @@
 name: status
 description: Displays a unified progress dashboard of the project by parsing the Tracks Registry and track plans alongside zero-context design audit status, Stage 3 Human Gate locks, and decisions.tsv and verification.log trails.
 metadata:
-  version: "2.1"
+  version: "0.1.0"
 ---
 
 # Status Skill (`/status`)

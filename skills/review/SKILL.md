@@ -2,7 +2,7 @@
 name: review
 description: Executes the Stage 5 Triple Verification & PR pipeline (Empirical Runtime Log Verification, Anti-Slop/No-Comments & Interrogate + Spec/Contract Drift Report + Guideline/Security Review + Git PR creation via opening-a-pr).
 metadata:
-  version: "2.1"
+  version: "0.1.0"
 ---
 
 # Review & PR Skill (`/review`)

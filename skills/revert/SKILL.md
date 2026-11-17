@@ -2,7 +2,7 @@
 name: revert
 description: Reverts previous work (tracks, phases, or tasks) by reconciling Git commits with plan.md and appending an auditable superseding entry to the append-only decisions.tsv trail.
 metadata:
-  version: "2.1"
+  version: "0.1.0"
 ---
 
 # Revert Skill (`/revert`)

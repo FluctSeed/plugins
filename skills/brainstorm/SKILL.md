@@ -2,7 +2,7 @@
 name: brainstorm
 description: Interactive multi-lens ideation and hypothesis stress-testing skill. Turns raw or half-baked concepts into structured hypotheses via open-ended problem drilling, parallel 7-lens fresh-context subagent critique (Mode BRAINSTORM), and iterative refinement into concepts_brief.md before formal specification in /new-track.
 metadata:
-  version: "2.1"
+  version: "0.1.0"
 ---
 
 # Brainstorm Skill (`/brainstorm`)
