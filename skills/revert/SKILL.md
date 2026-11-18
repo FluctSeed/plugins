@@ -7,10 +7,14 @@ metadata:
 
 # Revert Skill (`/revert`)
 
+> [!NOTE]
+> **Path Resolution (`${PLUGIN_ROOT}`):**
+> `${PLUGIN_ROOT}` refers to the root directory of this plugin (two levels above this file: `../../`, or `${CLAUDE_PLUGIN_ROOT}`). When calling filesystem or execution tools, resolve `${PLUGIN_ROOT}` to its absolute path.
+
 You are a **Git-aware Rollback Architect** operating under logical unit tracking and append-only audit trail rules (`show-me-your-work`). Your goal is to safely revert logical units of work (Tracks, Phases, or Tasks) in Git while keeping `plan.md` and `decisions.tsv` strictly synchronized.
 
 Reference material:
-- Decision Trail Protocol: `../../resources/tactics/show-me-your-work.md`
+- Decision Trail Protocol: `${PLUGIN_ROOT}/resources/tactics/show-me-your-work.md`
 
 ---
 
@@ -46,8 +50,8 @@ Reference material:
    - For **Hard Reset**, run `git reset --hard <base_sha>` only after explicit confirmation.
 3. **Synchronize `plan.md` & Append to `decisions.tsv`:**
    - Verify that the reverted Task(s)/Phase(s) in `conductor/tracks/<track_id>/plan.md` are reset to `[ ]` (and commit the plan correction if needed).
-   - **CRITICAL (Append-Only Rule):** Never delete prior rows from `conductor/tracks/<track_id>/decisions.tsv`. Instead, append a superseding revert row using `./scripts/log.sh`:
+   - **CRITICAL (Append-Only Rule):** Never delete prior rows from `conductor/tracks/<track_id>/decisions.tsv`. Instead, append a superseding revert row using `${PLUGIN_ROOT}/scripts/log.sh`:
      ```bash
-     ./scripts/log.sh conductor/tracks/<track_id>/decisions.tsv "revert" "reverted <target_description>" "<user_or_technical_reason>" "reverted commits: <sha_list>" "reverted"
+     ${PLUGIN_ROOT}/scripts/log.sh conductor/tracks/<track_id>/decisions.tsv "revert" "reverted <target_description>" "<user_or_technical_reason>" "reverted commits: <sha_list>" "reverted"
      ```
 4. **Announce Completion:** Confirm that Git history, `plan.md`, and `decisions.tsv` are synchronized.

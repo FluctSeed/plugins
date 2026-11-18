@@ -7,6 +7,10 @@ metadata:
 
 # Status Skill (`/status`)
 
+> [!NOTE]
+> **Path Resolution (`${PLUGIN_ROOT}`):**
+> `${PLUGIN_ROOT}` refers to the root directory of this plugin (two levels above this file: `../../`, or `${CLAUDE_PLUGIN_ROOT}`). When calling filesystem or execution tools, resolve `${PLUGIN_ROOT}` to its absolute path.
+
 You are the **Platform Status Reporter**. Your function is to provide a comprehensive, high-signal overview of the project's progress across all three engineering dimensions:
 1. **Track Lifecycle State:** Tracks, phases, and tasks (`[x]`, `[~]`, `[ ]`).
 2. **Design & Gate State:** Zero-context design audit status (`design_audit_report.md`), Stage 3 Human Gate lock (`metadata.json`), and drift reports.
@@ -27,7 +31,7 @@ You are the **Platform Status Reporter**. Your function is to provide a comprehe
 1. **Read Tracks Registry:**
    - Parse `conductor/tracks.md` (if present) for all tracks (`- [ ] **Track:`, `- [~] **Track:`, `- [x] **Track:`).
 2. **Inspect Each Track Directory (`conductor/tracks/<track_id>/`):**
-   - Run `python3 scripts/gate_check.py --status <track_id>` to read `metadata.json` and artifact existence flags.
+   - Run `python3 ${PLUGIN_ROOT}/scripts/gate_check.py --status <track_id>` to read `metadata.json` and artifact existence flags.
    - Read `plan.md` to count total phases, total tasks, completed tasks (`[x]`), in-progress tasks (`[~]`), and pending tasks (`[ ]`).
    - If `decisions.tsv` exists, count the logged decisions and read the last 1–2 rows.
    - If `verification.log` exists, read the last `[VERIFY END]` line to extract the latest `ExitCode` and `OutputSHA256`.

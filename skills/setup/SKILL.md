@@ -7,13 +7,17 @@ metadata:
 
 # Project Setup Skill (`/setup`)
 
+> [!NOTE]
+> **Path Resolution (`${PLUGIN_ROOT}`):**
+> `${PLUGIN_ROOT}` refers to the root directory of this plugin (two levels above this file: `../../`, or `${CLAUDE_PLUGIN_ROOT}`). When calling filesystem or execution tools, resolve `${PLUGIN_ROOT}` to its absolute path.
+
 You are the **System Architect** operating in **Phase 1 (Pre-Gate Context & Architecture Contract Scaffolding)**. Your goal is to initialize a repository for Spec-Driven and Empirical Development by establishing persistent context documents in `conductor/` and grounding existing directories in code-verified `README.md` architecture contracts (`Interface`, `Invariants`, `Side Effects`).
 
 Reference materials:
-- Workflow Template: `../../resources/templates/workflow.md`
-- Security Policy Template: `../../resources/templates/security-policy.md`
-- Code Style Guides: `../../resources/styleguides/*.md`
-- Directory Contract Bootstrapping: `../../resources/tactics/bootstrap-contracts.md` and `../../resources/templates/contract_templates.md`
+- Workflow Template: `${PLUGIN_ROOT}/resources/templates/workflow.md`
+- Security Policy Template: `${PLUGIN_ROOT}/resources/templates/security-policy.md`
+- Code Style Guides: `${PLUGIN_ROOT}/resources/styleguides/*.md`
+- Directory Contract Bootstrapping: `${PLUGIN_ROOT}/resources/tactics/bootstrap-contracts.md` and `${PLUGIN_ROOT}/resources/templates/contract_templates.md`
 
 ---
 
@@ -51,7 +55,7 @@ Present a concise overview to the user adapted to their stated intent:
 
 Run the automated directory resumption script:
 ```bash
-python3 scripts/resume.py
+python3 ${PLUGIN_ROOT}/scripts/resume.py
 ```
 *(Fallback if running from skill directory: `python3 skills/setup/scripts/resume.py`)*
 
@@ -91,27 +95,27 @@ Read the returned JSON object from `stdout` without mentioning the script path t
 3. Write the approved stack to `conductor/tech-stack.md`.
 
 ### 2.4 Code Style Guides (`conductor/code_styleguides/`)
-1. Propose matching style guides strictly from `resources/styleguides/` (or `skills/setup/assets/code_styleguides/`): `general.md`, `typescript.md`, `javascript.md`, `python.md`, `go.md`, `cpp.md`, `csharp.md`, `dart.md`, `ruby.md`, `html-css.md`.
+1. Propose matching style guides strictly from `${PLUGIN_ROOT}/resources/styleguides/` (or `skills/setup/assets/code_styleguides/`): `general.md`, `typescript.md`, `javascript.md`, `python.md`, `go.md`, `cpp.md`, `csharp.md`, `dart.md`, `ruby.md`, `html-css.md`.
 2. Ask the user to confirm or customize the selection, then copy the selected `.md` files into `conductor/code_styleguides/`.
 
 ### 2.5 Enterprise Security Policy (`conductor/security-policy.md`)
 1. Explain that `conductor/security-policy.md` establishes mandatory security invariants (secrets hygiene, boundary input parsing, authz checks, dependency rules) enforced during both design audits and code reviews.
 2. Ask the user to choose: **Default Enterprise Policy** or **Customize** (to add organization-specific compliance rules).
-3. Copy `resources/templates/security-policy.md` (or `skills/setup/assets/security-policy.md`) to `conductor/security-policy.md` and apply any custom rules.
+3. Copy `${PLUGIN_ROOT}/resources/templates/security-policy.md` (or `skills/setup/assets/security-policy.md`) to `conductor/security-policy.md` and apply any custom rules.
 
 ### 2.6 Workflow Configuration (`conductor/workflow.md`)
 1. Explain that `conductor/workflow.md` defines the operational engineering rules: **Two-Phase Autonomy**, **Zero-Context Pre-Gate Design Audit**, and **Empirical Implementation Discipline** (`Model the Domain`, `Reproduce First`, `Laziness Protocol`, `Prove It Works` via `verification.log`, and `decisions.tsv` + `git notes` Dual Audit Trail).
 2. Ask the user to choose: **Default Workflow** or **Customize** (test commands, coverage expectations, commit cadence).
-3. Copy `resources/templates/workflow.md` (or `skills/setup/assets/workflow.md`) to `conductor/workflow.md` and adapt the `Development Commands` section to the project's actual build/test commands discovered in Step 2.
+3. Copy `${PLUGIN_ROOT}/resources/templates/workflow.md` (or `skills/setup/assets/workflow.md`) to `conductor/workflow.md` and adapt the `Development Commands` section to the project's actual build/test commands discovered in Step 2.
 
 ### 2.7 Directory Architecture Contracts (`README.md` Bootstrap)
 1. **When to Run:**
    - **Brownfield Projects:** Recommend generating directory-level `README.md` architecture contracts (`Interface`, `Invariants`, `Side Effects` with `[file:symbol]` citations) so zero-context reviewers and implementers have code-grounded contracts.
    - **Greenfield Projects:** Offer to generate the root `README.md` blueprint contract now, or defer until initial directories exist.
 2. **Protocol Execution (if approved by user):**
-   - Read and follow `resources/tactics/bootstrap-contracts.md` and `resources/templates/contract_templates.md`.
+   - Read and follow `${PLUGIN_ROOT}/resources/tactics/bootstrap-contracts.md` and `${PLUGIN_ROOT}/resources/templates/contract_templates.md`.
    - **Mandatory Safety Gate:** Perform incremental BFS directory discovery (ignoring `.git`, `node_modules`, `dist`, `build`, `venv`, `conductor`). If more than **15** code-bearing subdirectories are found, pause and ask explicit user approval before full-tree bootstrapping.
-   - Spawn read-only codebase explorer scouts (or `agents/bootstrap_orchestrator.md` for >5 directories) to extract real code symbols (`[file:symbol_or_flag]`) without hallucinating routes or enums.
+   - Spawn read-only codebase explorer scouts (or `${PLUGIN_ROOT}/agents/bootstrap_orchestrator.md` for >5 directories) to extract real code symbols (`[file:symbol_or_flag]`) without hallucinating routes or enums.
    - Generate or update leaf package and root blueprint `README.md` contracts without overwriting existing human prose.
 
 ---

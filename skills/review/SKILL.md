@@ -7,15 +7,19 @@ metadata:
 
 # Review & PR Skill (`/review`)
 
+> [!NOTE]
+> **Path Resolution (`${PLUGIN_ROOT}`):**
+> `${PLUGIN_ROOT}` refers to the root directory of this plugin (two levels above this file: `../../`, or `${CLAUDE_PLUGIN_ROOT}`). When calling filesystem or execution tools, resolve `${PLUGIN_ROOT}` to its absolute path.
+
 You are the **Principal Code & Architecture Reviewer**. Your goal is to subject a completed track (or active diff) to **three orthogonal verification layers** before generating a clean, high-signal Git Pull Request:
 1. **Empirical Runtime & Code Hygiene Layer:** Real build/test execution proof (`Prove It Works`), decision trail verification (`show-me-your-work`), comment/slop stripping (`no-comments`, `unslop`), and adversarial code interrogation (`interrogate`).
 2. **Architectural Drift Layer:** Spec-to-code and contract-to-code drift detection (`drift-report`).
 3. **Standards & Security Compliance Layer:** Styleguide (`code_styleguides/*.md`), product guideline, and enterprise security policy (`security-policy.md`) review, followed by track archiving and **`opening-a-pr.md` Git PR creation**.
 
 Reference materials:
-- Spec & Contract Drift Report: `../../resources/tactics/drift-report.md`
-- Opening a PR: `../../resources/playbooks/opening-a-pr.md`
-- Review & Hygiene Tactics: `../../resources/tactics/no-comments.md`, `unslop.md`, `interrogate.md`, `technical-writing.md`, `show-me-your-work.md`
+- Spec & Contract Drift Report: `${PLUGIN_ROOT}/resources/tactics/drift-report.md`
+- Opening a PR: `${PLUGIN_ROOT}/resources/playbooks/opening-a-pr.md`
+- Review & Hygiene Tactics: `${PLUGIN_ROOT}/resources/tactics/no-comments.md`, `unslop.md`, `interrogate.md`, `technical-writing.md`, `show-me-your-work.md`
 
 ---
 
@@ -39,20 +43,20 @@ Reference materials:
 
 1. **Real Build & Test Execution Proof (`principle-prove-it-works`):**
    - Infer the repository's build, lint, and test commands from `conductor/workflow.md` and `conductor/tech-stack.md`.
-   - Execute the verification suite using `./scripts/capture-verify-log.sh <track_id> "CI=true <test_and_build_cmd>"`.
+   - Execute the verification suite using `${PLUGIN_ROOT}/scripts/capture-verify-log.sh <track_id> "CI=true <test_and_build_cmd>"`.
    - Confirm that `conductor/tracks/<track_id>/verification.log` contains the fresh run output and exit code `0`. "It compiles" without behavioral test/runtime evidence is a **High** severity finding.
 2. **Decision Trail Audit (`show-me-your-work`):**
    - Read `conductor/tracks/<track_id>/decisions.tsv`.
    - Verify that every major decision, pivot, and task completion in the track has a corresponding row with a resolvable `evidence` pointer (commit SHA or log path).
 3. **Comment Auditor & Unslop Pass (`no-comments` & `unslop`):**
-   - Audit the diff against `resources/tactics/no-comments.md` (spawning `agents/comment_auditor.md` if subagents are available) and `resources/tactics/unslop.md`.
+   - Audit the diff against `${PLUGIN_ROOT}/resources/tactics/no-comments.md` (spawning `${PLUGIN_ROOT}/agents/comment_auditor.md` if subagents are available) and `${PLUGIN_ROOT}/resources/tactics/unslop.md`.
    - Flag any phase-narrating comments (e.g., `// Phase 1: ...`, `// Added for track ...`), redundant JSDoc/docstrings that merely restate types, or AI slop code/guards.
 4. **Adversarial Diff Interrogation (`interrogate`):**
    - Check the diff for race conditions, partial failure states, non-idempotent operations (`principle-make-operations-idempotent`), and boundary leaks (`principle-boundary-discipline`). Keep only findings backed by a concrete failure trace or reproducible scenario.
 
 ### 2.2 Layer 2 — Spec-to-Code & Contract Drift Audit (`drift-report`)
 
-Follow `resources/tactics/drift-report.md` across `conductor/tracks/<track_id>/spec.md` and affected directory `README.md` architecture contracts:
+Follow `${PLUGIN_ROOT}/resources/tactics/drift-report.md` across `conductor/tracks/<track_id>/spec.md` and affected directory `README.md` architecture contracts:
 1. **Compare Design vs. Reality:** Check all modified source files against `spec.md` and directory `README.md` contracts for:
    - **Missing Features:** Logic or acceptance criteria specified in `spec.md` but absent in code.
    - **Incomplete Domain Models:** Types, structs, schemas, or state machines missing fields or invariants specified in `spec.md`.
@@ -106,7 +110,7 @@ Present the consolidated findings to the user in the following structure (and sa
 
 ### 4.1 Review Decision & Remediation
 1. If any findings exist, ask the user how to proceed using a single-choice question:
-   - **Apply Fixes:** Automatically apply the suggested code/comment/contract repairs, re-run `./scripts/capture-verify-log.sh` to prove tests pass, record `- [x] Task: Apply review suggestions <short_sha>` under `## Phase: Review Fixes` in `plan.md`, and append a row to `decisions.tsv`.
+   - **Apply Fixes:** Automatically apply the suggested code/comment/contract repairs, re-run `${PLUGIN_ROOT}/scripts/capture-verify-log.sh` to prove tests pass, record `- [x] Task: Apply review suggestions <short_sha>` under `## Phase: Review Fixes` in `plan.md`, and append a row to `decisions.tsv`.
    - **Manual Fix:** Halt so the user can edit the code manually.
    - **Proceed Without Changes:** Accept residual Medium/Low notes and continue.
 
@@ -117,7 +121,7 @@ Ask the user what to do with the completed track folder using a single-choice qu
 - **Delete:** Permanently delete after explicit confirmation.
 
 ### 4.3 Disciplined Git PR Creation (`opening-a-pr.md`)
-Read and follow `resources/playbooks/opening-a-pr.md` and `resources/tactics/technical-writing.md`:
+Read and follow `${PLUGIN_ROOT}/resources/playbooks/opening-a-pr.md` and `${PLUGIN_ROOT}/resources/tactics/technical-writing.md`:
 1. Ask the user via a **Yes/No question** if they would like to open (or prepare) a Git Pull Request for this track now.
 2. **PR Title:** Conventional Commits format `type(scope): short imperative subject` (no trailing period).
 3. **PR Description (1-Minute Briefing, <= 40 lines):**
