@@ -12,13 +12,15 @@ description: Phase 2 empirical implementation discipline for concise responses, 
 Cite each `principle-*` file (`resources/principles/principle-*.md`) that shaped a design or implementation choice in your final summary.
 
 - **First message on an implementation task**: State in your own words the user's goal, the problem being solved, and the smallest code change expected to meet it. If codebase evidence rules out the requested approach, present the evidence and stop.
+- **Multi-session resumption & subsystem explanation**: Use `resources/tactics/recall.md` to reconstruct recent workspace and track state, and `resources/tactics/teach.md` when explaining how and why a subsystem works.
 - **Empirical before `AskQuestion`**: If a fork can be settled by reading code (`resources/tactics/how.md`, `why.md`) or running a quick prototype (`resources/playbooks/prototype.md`), test it yourself instead of asking the human. Reserve questions for product intent or architectural trade-offs (`Author Decides Architecture`).
-- **Any stateful logic**: Name the domain data shape first (`principle-model-the-domain`) and concentrate validation at system boundaries (`principle-boundary-discipline`).
+- **Any stateful logic**: Name the domain data shape first (`principle-model-the-domain`) and concentrate validation at system boundaries (`principle-boundary-discipline`). For concurrency races, retry loops, state machines, or parsers, apply `resources/tactics/formal-verification.md`.
+- **Unscripted application surfaces**: When a service or UI lacks deterministic end-to-end verification, assemble a `Launch -> Doctor -> Drive -> Evidence -> Cleanup` loop via `resources/tactics/verification-harness.md`.
 - **Cross-boundary design**: Sketch competing shapes via `resources/tactics/architect.md` and `resources/tactics/arena.md` before locking in code.
 - **Parallel fan-out**: Use `resources/tactics/swarm.md` for independent slices and `resources/tactics/interrogate.md` for adversarial defect hunting.
 - **Multi-step tracks**: Maintain the Throughput Checkpoint in `plan.md` (`resources/playbooks/feature.md`).
 - **Prose and code hygiene**: Follow `resources/tactics/unslop.md`, `resources/tactics/technical-writing.md`, and `resources/tactics/no-comments.md` (verified by `agents/comment-auditor.md`).
-- **Performance claims**: Apply `resources/principles/principle-explain-the-number.md` before reporting or acting on any latency or throughput measurement.
+- **Performance claims**: Apply `resources/principles/principle-explain-the-number.md` and `resources/tactics/benchmark-checklist.md` before reporting or acting on any latency or throughput measurement.
 - **PR status / triage / shipping**: Follow `resources/playbooks/babysit.md`, `resources/templates/bugbot-triage.md`, and `resources/playbooks/shipping.md`.
 - **Audit trail**: Log decisions, pivots, and verification proofs in `<TRACK_DIR>/decisions.tsv` (`resources/tactics/show-me-your-work.md`) and `<TRACK_DIR>/verification.log` (`scripts/capture-verify-log.sh`).
 

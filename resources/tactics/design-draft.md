@@ -154,8 +154,8 @@ this strict generation order:
     *   **Priority 3: Interactive Chat Prompt**: If neither file exists, prompt
         the user in chat for the feature's problem statement, goals, and
         technical context, or suggest that the user start the `brainstorm`
-        skill with the host's command form (for example `/egm:brainstorm`
-        in Claude Code and agy CLI, or the skill picker in Codex).
+        skill with the host's command form (`/fluctseed:brainstorm` in Claude
+        Code, `/brainstorm` in Antigravity, or `fluctseed:brainstorm` in Codex).
 3.  **Verify State**: Parse the document. Present a quick confirmation to the
     user to ensure we are starting with the correct context.
 4.  **Consensus**: Get explicit approval to start drafting the document.
@@ -313,7 +313,7 @@ strictly:
     syntax, and proper code block fences.
 
 6.  **Handoff**: Provide a clickable link to the finalized design and recommend
-    that the user review it by starting the `design-review` skill on
-    `<DESIGN_PATH>` with the host's command form (for example
-    `/egm:design-review <DESIGN_PATH>` in Claude Code and agy CLI, or the skill
-    picker in Codex).
+    that the user review it by starting the `review` skill on
+    `<DESIGN_PATH>` with the host's command form (`/fluctseed:review <DESIGN_PATH>`
+    in Claude Code, `/review <DESIGN_PATH>` in Antigravity, or `fluctseed:review`
+    in Codex).

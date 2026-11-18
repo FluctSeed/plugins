@@ -18,7 +18,7 @@ Reference materials:
 - Execution Mode Overview: `${PLUGIN_ROOT}/resources/tactics/execution-mode.md`
 - Playbooks (23 total): `${PLUGIN_ROOT}/resources/playbooks/*.md` (`feature.md`, `bug-fix.md`, `refactoring.md`, `perf-issue.md`, `multi-phase-plan.md`, etc.)
 - Principles (24 total): `${PLUGIN_ROOT}/resources/principles/principle-*.md`
-- Tactics: `${PLUGIN_ROOT}/resources/tactics/tdd.md`, `architect.md`, `arena.md`, `show-me-your-work.md`, `unslop.md`, `no-comments.md`
+- Tactics (29 total): `${PLUGIN_ROOT}/resources/tactics/tdd.md`, `architect.md`, `arena.md`, `benchmark-checklist.md`, `verification-harness.md`, `formal-verification.md`, `show-me-your-work.md`, `unslop.md`, `no-comments.md`, `teach.md`, `recall.md`
 
 ---
 
@@ -63,11 +63,12 @@ Reference materials:
 
 2. **Load Context & Matching Playbook:**
    - Read `<TRACK_DIR>/spec.md`, `<TRACK_DIR>/plan.md`, `<TRACK_DIR>/metadata.json`, active styleguides, `security-policy.md`, and affected directory `README.md` contracts (`python3 "${PLUGIN_ROOT}/scripts/prepare_audit_context.py" --conductor-dir "<CONDUCTOR_DIR>"`).
-   - Read the playbook matching `metadata.json` `"type"`:
+   - Read the playbook and verification tactics matching `metadata.json` `"type"` and scope:
      - `bug` -> `${PLUGIN_ROOT}/resources/playbooks/bug-fix.md` + `tactics/tdd.md` + `principles/principle-fix-root-causes.md`
-     - `feature` / `mvp` -> `${PLUGIN_ROOT}/resources/playbooks/feature.md` + `principles/principle-model-the-domain.md`
+     - `feature` / `mvp` -> `${PLUGIN_ROOT}/resources/playbooks/feature.md` + `principles/principle-model-the-domain.md` (+ `tactics/verification-harness.md` when the primary app surface lacks scripted end-to-end verification)
      - `refactor` -> `${PLUGIN_ROOT}/resources/playbooks/refactoring.md` + `principles/principle-subtract-before-you-add.md`
-     - `perf` -> `${PLUGIN_ROOT}/resources/playbooks/perf-issue.md` + `principles/principle-explain-the-number.md`
+     - `perf` -> `${PLUGIN_ROOT}/resources/playbooks/perf-issue.md` + `principles/principle-explain-the-number.md` + `tactics/benchmark-checklist.md`
+     - Concurrency, retry loops, state machines, or parsers -> `${PLUGIN_ROOT}/resources/tactics/formal-verification.md`
 
 3. **Sequential Task State Machine (`[ ] -> [~] -> [x]`):**
    For each pending task `- [ ] Task: ...` in `<TRACK_DIR>/plan.md` (preserving exact task wording so `plan_structure_sha256` remains intact):
@@ -90,8 +91,17 @@ Reference materials:
      - Update the task checkbox in `<TRACK_DIR>/plan.md` from `[~]` to `[x] <short_sha>` and commit `chore(plan): mark task '<task_name>' complete`.
    - **3.6 Phase Checkpoint:** At the end of each phase, run the full verification suite via `capture-verify-log.sh` and follow `workflow.md` checkpoint rules.
 
-4. **Finalize Track Status & Sync Contracts:**
-   - Mark the track `[x]` in `<CONDUCTOR_DIR>/tracks.md`, set `"status": "implemented"` in `<TRACK_DIR>/metadata.json`, update any affected directory `README.md` contracts (`Interface`, `Invariants`, `Side Effects`), and commit.
+4. **Finalize Track Status & Synchronize Project Context:**
+   - Mark the track `[x]` in `<CONDUCTOR_DIR>/tracks.md` and set `"status": "implemented"` in `<TRACK_DIR>/metadata.json`.
+   - Update any affected directory `README.md` architecture contracts (`Interface`, `Invariants`, `Side Effects`).
+   - **Synchronize Permanent Project Context (`<CONDUCTOR_DIR>/`):**
+     - Compare `<TRACK_DIR>/spec.md` against `<CONDUCTOR_DIR>/product.md`, `<CONDUCTOR_DIR>/tech-stack.md`, and `<CONDUCTOR_DIR>/product-guidelines.md` (when present locally):
+       - **`product.md`:** Propose updates if the completed track materially alters user-facing capabilities or domain workflows.
+       - **`tech-stack.md`:** Propose updates if approved libraries, storage engines, or runtimes were added or removed.
+       - **`product-guidelines.md` (High Sensitivity):** Propose updates only for deliberate brand, UX, or voice shifts, accompanied by an explicit sensitivity warning.
+     - Present a concise summary of proposed permanent-context edits and ask a single Yes/No confirmation question before modifying `product.md`, `tech-stack.md`, or `product-guidelines.md`.
+     - **Permanent-Context Purity Rule:** Distill timeless domain and stack facts only. **Never** add references or links to `tracks/<track_id>/` or `tracks.md` inside `index.md`, `product.md`, `product-guidelines.md`, `tech-stack.md`, `security-policy.md`, or `workflow.md`.
+   - Commit synchronized state (`docs(conductor): synchronize project context for '<track_id>'`).
 
 ---
 

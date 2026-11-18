@@ -31,5 +31,6 @@ You operate under a Spec-Driven and Empirical Engineering lifecycle organized ar
    - Every `review` verifies both code quality/security and contract fidelity (`drift_report.md`).
 5. **Direct, Sequential Communication**
    - Ask at most one question per turn. Eliminate flattery (`No Glazing`), performative apologies, and filler prose (`unslop`).
-6. **Monorepo & Module Conductor Awareness**
+6. **Monorepo & Permanent-Context Separation**
    - Multiple module-level `<module_path>/conductor/` directories can exist alongside an optional root `conductor/`. Commands auto-discover module conductors from the git root or working directory and inherit root `security-policy.md` and `code_styleguides/` when not overridden locally.
+   - Permanent context documents (`index.md`, `product.md`, `product-guidelines.md`, `tech-stack.md`, `security-policy.md`, `workflow.md`) represent timeless system state and **never** reference `tracks/` or `tracks.md`. Track workstreams are indexed exclusively in standalone `<CONDUCTOR_DIR>/tracks.md`.

@@ -124,7 +124,7 @@ Write `<CONDUCTOR_DIR>/index.md` linking all active local (or inherited root) do
 - [Module / Repository Blueprint](../README.md)
 ```
 
-1. Verify every linked path in `<CONDUCTOR_DIR>/index.md` resolves on disk.
+1. Verify every linked path in `<CONDUCTOR_DIR>/index.md` resolves on disk. Never add `tracks/` or `tracks.md` links to `index.md`, `product.md`, `product-guidelines.md`, `tech-stack.md`, `security-policy.md`, or `workflow.md`; those 6 files hold timeless project state only.
 2. Stage `<CONDUCTOR_DIR>/` (and any approved `README.md` contracts) and commit:
    `chore(setup): initialize project context, security policy, and workflow standards`
 

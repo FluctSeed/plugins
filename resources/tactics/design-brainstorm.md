@@ -133,7 +133,7 @@ If your harness has no subagent tool, stop and tell the user: a review in the sa
         {
           "question": "Anchored feature hypothesis: [2-3 sentence summary]. How would you like to proceed?",
           "options": [
-            "Review with Goldfishes",
+            "Run 7-lens fresh-context review",
             "Clarify additional constraints or assumptions in chat"
           ],
           "is_multi_select": false
@@ -142,7 +142,7 @@ If your harness has no subagent tool, stop and tell the user: a review in the sa
     }
     ```
 
-    *   **Option 0: `Review with Goldfishes`**: The user confirms readiness.
+    *   **Option 0: `Run 7-lens fresh-context review`**: The user confirms readiness.
         Proceed immediately to Step 2 (fresh-context review & Synthesis) to invoke
         `synthesizer`.
     *   **Option 1: `Clarify additional constraints or assumptions in chat`**:
@@ -242,23 +242,21 @@ these into Alternatives Considered and has no other source for them.]
     ```
 
     *   **Option 0: `Publish concepts_brief.md as RFC for team feedback`**:
-        *   Write `concepts_brief.md` to `docs/designs/<feature_name>.md` using
-            your file-writing tool.
-        *   Register the RFC in `conductor/index.md` if it exists.
+        *   Write `concepts_brief.md` to `<CONDUCTOR_DIR>/rfcs/<feature_name>.md` (or `docs/designs/<feature_name>.md` when no `conductor/` exists) using
+            your file-writing tool. Do not add RFC or track links to `conductor/index.md`.
         *   Notify the user in chat that the RFC has been published and can be
             shared with the team for feedback before formal drafting. Remind the
             user that once feedback is gathered, a detailed design can be
-            initiated by starting the `new-track` skill on
-            `docs/designs/<feature_name>.md` with the host's command form (for
-            example `/egm:new-track docs/designs/<feature_name>.md` in Claude
-            Code and agy CLI, or the skill picker in Codex).
+            initiated by starting the `new-track` skill with the host's command
+            form (`/fluctseed:new-track` in Claude Code, `/new-track` in
+            Antigravity, or `fluctseed:new-track` in Codex).
     *   **Option 1: `Proceed to new-track (Initialize formal design
         document)`**:
         *   Confirm that `concepts_brief.md` is saved in the working directory
             or artifact directory.
         *   Instruct the user to start the `new-track` skill with the host's
-            command form (for example `/egm:new-track` in Claude Code and agy
-            CLI, or the skill picker in Codex), noting that it automatically
+            command form (`/fluctseed:new-track` in Claude Code, `/new-track` in
+            Antigravity, or `fluctseed:new-track` in Codex), noting that it automatically
             ingests `concepts_brief.md` as its Priority 1 intake source.
     *   **Option 2: `Continue refining concepts_brief.md in ideation mode`**:
         *   Return to Step 3 iteration loop to drill into further edge cases or

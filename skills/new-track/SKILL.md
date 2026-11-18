@@ -71,21 +71,25 @@ Follow `${PLUGIN_ROOT}/resources/tactics/design-draft.md`:
    {
      "track_id": "<track_id>",
      "conductor_dir": "<CONDUCTOR_DIR>",
-     "type": "<feature|bug|refactor|perf|chore>",
+     "type": "<feature|mvp|bug|refactor|perf|chore>",
      "status": "draft",
      "phase_mode": "Phase 1 (Spec & Zero-Context Audit)",
      "design_audited": false,
      "human_gate_approved": false
    }
    ```
-3. Resolve any remaining architectural trade-offs (`Author Decides Architecture`), then write `<TRACK_DIR>/spec.md` following `${PLUGIN_ROOT}/resources/templates/design_doc.md` and `${PLUGIN_ROOT}/resources/standards/feature-spec-standard.md`:
+3. For non-trivial `feature`, `mvp`, or `refactor` tracks, ask the developer to select a **Drafting Cadence**:
+   - `(Recommended) Consolidated spec.md draft` (write the complete initial `spec.md` in one pass for review)
+   - `Section-by-Section interactive drafting` (approve `Why & Goals`, `Technical Design`, and `Alternatives Considered` step by step per `${PLUGIN_ROOT}/resources/tactics/design-draft.md`)
+4. Resolve any remaining architectural trade-offs (`Author Decides Architecture`), then write `<TRACK_DIR>/spec.md` following `${PLUGIN_ROOT}/resources/templates/design_doc.md` and the matching standard in `${PLUGIN_ROOT}/resources/standards/`:
    - `## Why` (Overview & Problem Statement)
    - `## Goals & Non-Goals`
    - `## Domain Data Shape & Invariants` (core types, state transitions, and boundary validations per `security-policy.md`)
    - `## Technical Design & Functional Requirements`
    - `## Alternatives Considered` (carried from `concepts_brief.md` plus rejected spec options)
    - `## Acceptance Criteria & Verification Surface`
-4. Link `<TRACK_DIR>/spec.md` in chat and ask via single-select gate whether to **Approve `spec.md` and Draft `plan.md`** or **Revise `spec.md`**.
+5. If `concepts_brief.md` was ingested, reconcile `<TRACK_DIR>/spec.md` against `concepts_brief.md` (`design-draft.md` Step 6.1) and flag any contradiction or new architectural interface before proceeding.
+6. Link `<TRACK_DIR>/spec.md` in chat and ask via single-select gate whether to **Approve `spec.md` and Draft `plan.md`** or **Revise `spec.md`**.
 
 ---
 
@@ -117,7 +121,10 @@ Subject `<TRACK_DIR>/spec.md` and `<TRACK_DIR>/plan.md` to isolated subagent rev
 ### 4.1 Stage Binding (`FeatureRange` & `DetailedRange`)
 1. **Stage 5 (`Zoom Out`):** Spawn `zoom-out` on `<TRACK_DIR>/spec.md` with `${PLUGIN_ROOT}/resources/standards/zoom-out-standard.md` + `audit_context`.
 2. **Stage 6 (`Comprehension Test`):** Spawn `comprehension` on `<TRACK_DIR>/spec.md` and `<TRACK_DIR>/plan.md` **with NO `audit_context`** (and in Codex CLI explicitly instruct ignoring repository `AGENTS.md`) to test standalone clarity and produce the fresh-eyes paraphrase.
-3. **Stage 7 (`Critic Review`):** Spawn `design-critic`, `structural`, and `style` in parallel on `<TRACK_DIR>/spec.md` with `${PLUGIN_ROOT}/resources/standards/feature-spec-standard.md` + `audit_context`.
+3. **Stage 7 (`Critic Review`):** Spawn `design-critic`, `structural`, and `style` in parallel on `<TRACK_DIR>/spec.md` with `audit_context` and the standard matching `metadata.json` `"type"`:
+   - `feature`, `bug`, `perf`, or `chore`: `${PLUGIN_ROOT}/resources/standards/feature-spec-standard.md`
+   - `mvp` (or research/greenfield bets): `${PLUGIN_ROOT}/resources/standards/feature-spec-standard.md` + `${PLUGIN_ROOT}/resources/standards/heilmeier-standard.md`
+   - `refactor` (or migration/rewrite): `${PLUGIN_ROOT}/resources/standards/re-implementation-standard.md`
 4. **Stage 8 (`Inventive Catalyst`):** Spawn `inventive-catalyst` on `<TRACK_DIR>/spec.md` with `${PLUGIN_ROOT}/resources/standards/zoom-out-standard.md` + `audit_context`.
 5. **Stage 9 (`Implementation Readiness`):** Spawn `implementation-readiness`, `codebase-details`, and `style` in parallel on `<TRACK_DIR>/plan.md` with `${PLUGIN_ROOT}/resources/standards/implementation-readiness-standard.md` + `audit_context`.
 
@@ -147,12 +154,12 @@ Subject `<TRACK_DIR>/spec.md` and `<TRACK_DIR>/plan.md` to isolated subagent rev
      ```bash
      python3 "${PLUGIN_ROOT}/scripts/gate_check.py" --approve "<TRACK_DIR>" --conductor-dir "<CONDUCTOR_DIR>"
      ```
-   - Append the track entry to `<CONDUCTOR_DIR>/tracks.md` (creating it and linking `./tracks.md` in `<CONDUCTOR_DIR>/index.md` if this is the first track):
+   - Append the track entry to standalone `<CONDUCTOR_DIR>/tracks.md` (creating `<CONDUCTOR_DIR>/tracks.md` if absent; **never** link `tracks.md` or `tracks/` inside `<CONDUCTOR_DIR>/index.md`, `product.md`, `product-guidelines.md`, `tech-stack.md`, `security-policy.md`, or `workflow.md`):
      ```markdown
      ---
      - [ ] **Track: <Track Description>**
        *Link: [./tracks/<track_id>/index.md](./tracks/<track_id>/index.md)*
      ```
-   - Stage `<CONDUCTOR_DIR>/tracks.md`, `<CONDUCTOR_DIR>/index.md`, and `<TRACK_DIR>/` and commit:
+   - Stage `<CONDUCTOR_DIR>/tracks.md` and `<TRACK_DIR>/` and commit:
      `chore(conductor): create and approve track '<track_id>'`
    - Announce that the Stage 3 Human Gate is locked and ready for `implement`.

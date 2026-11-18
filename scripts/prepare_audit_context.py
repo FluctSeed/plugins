@@ -12,7 +12,7 @@ import sys
 IGNORE_DIRS = {
     ".git", "node_modules", "dist", "build", "venv", ".venv",
     "vendor", "third_party", "target", "out", "coverage", "__pycache__", "pods",
-    "conductor", ".claude", ".codex", ".agent", ".agents", ".gemini", ".grok",
+    "conductor", "tracks", "archive", ".claude", ".codex", ".agent", ".agents", ".gemini", ".grok",
 }
 
 
