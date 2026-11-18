@@ -1,6 +1,6 @@
-# Fluctseed: Spec-Driven and Empirical AI Engineering Platform
+# Fluctseed Corp.
 
-**Fluctseed** is a cross-platform AI engineering plugin that enforces a **5-stage engineering lifecycle** across **Claude Code**, **OpenAI Codex CLI**, and **Google Antigravity (`agy`)** through **7 lifecycle commands** (`setup`, `brainstorm`, `new-track`, `implement`, `review`, `status`, `revert`):
+**Fluctseed** (by **Fluctseed Corp.**) is a cross-platform AI engineering plugin that enforces a **5-stage engineering lifecycle** across **Claude Code**, **OpenAI Codex CLI**, and **Google Antigravity (`agy`)** through **7 lifecycle commands** (`setup`, `brainstorm`, `new-track`, `implement`, `review`, `status`, `revert`):
 
 1. **Stateful Document & Track Spine (`conductor/`)**: Persistent project context (`product.md`, `tech-stack.md`, `security-policy.md`, `code_styleguides/`, `workflow.md`), ideation briefs (`concepts_brief.md`), track specifications (`tracks/<id>/spec.md` & `plan.md`), `[ ] -> [~] -> [x]` task state transitions, and monorepo multi-module conductor discovery (`<module_path>/conductor/`) with automatic inheritance of root security policies and styleguides.
 2. **Zero-Context Multi-Lens Ideation & Design Audit (`agents/` & `resources/standards/`)**: Separation between the primary drafting session and isolated, read-only reviewer subagents that stress-test raw concepts across 7 lenses (`Mode: BRAINSTORM`), audit specifications (`Stages 5 to 8`), audit implementation plans (`Stage 9`), verify directory architecture contracts (`README.md`), and detect spec-to-code drift (`drift_report.md`).

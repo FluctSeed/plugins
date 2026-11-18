@@ -1,10 +1,10 @@
 {
   "name": "fluctseed",
-  "displayName": "Fluctseed AI Engineering Platform",
+  "displayName": "Fluctseed Corp.",
   "version": "0.1.0",
   "description": "Spec-driven and empirical AI engineering lifecycle across /setup, /brainstorm, /new-track, /implement, /review, /status, and /revert with zero-context design verification and runtime proof.",
   "author": {
-    "name": "FluctSeed",
+    "name": "Fluctseed Corp.",
     "url": "https://github.com/FluctSeed"
   },
   "homepage": "https://github.com/FluctSeed/plugins",

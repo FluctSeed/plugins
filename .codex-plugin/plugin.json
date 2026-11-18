@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Spec-driven and empirical AI engineering lifecycle across setup, brainstorm, new-track, implement, review, status, and revert.",
   "author": {
-    "name": "FluctSeed"
+    "name": "Fluctseed Corp."
   },
   "homepage": "https://github.com/FluctSeed/plugins",
   "repository": "https://github.com/FluctSeed/plugins",
@@ -11,10 +11,10 @@
   "skills": "./skills/",
   "requires_local_executor": true,
   "interface": {
-    "displayName": "Fluctseed AI Engineering Platform",
+    "displayName": "Fluctseed Corp.",
     "shortDescription": "Spec-driven lifecycle with zero-context design audits and empirical execution rigor",
     "longDescription": "Provides a stateful track lifecycle (setup, brainstorm, new-track, implement, review, status, revert) with zero-context subagent design verification, Stage 3 Human Gate locking, and empirical implementation, root-cause debugging, and verification discipline.",
-    "developerName": "FluctSeed",
+    "developerName": "Fluctseed Corp.",
     "brandColor": "#1B6EF3",
     "category": "Developer Tools",
     "capabilities": [

@@ -1,12 +1,12 @@
 {
   "name": "fluctseed",
   "interface": {
-    "displayName": "Fluctseed AI Engineering Platform"
+    "displayName": "Fluctseed Corp."
   },
   "plugins": [
     {
       "name": "fluctseed",
-      "description": "Spec-Driven and Empirical AI Engineering Platform across /setup, /brainstorm, /new-track, /implement, /review, /status, and /revert",
+      "description": "Spec-driven and empirical AI engineering lifecycle across setup, brainstorm, new-track, implement, review, status, and revert",
       "version": "0.1.0",
       "source": "./",
       "policy": {
