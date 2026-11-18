@@ -104,6 +104,34 @@ for rule in "${CORE_RULES[@]}"; do
   check_path "$PLUGIN_ROOT/rules/${rule}.md"
 done
 
+if ! python3 - "$PLUGIN_ROOT" <<'PY'
+import glob, json, os, re, sys
+root = sys.argv[1]
+base_ver = json.load(open(os.path.join(root, "plugin.json")))["version"]
+mismatches = []
+for rel, getter in [
+    (".claude-plugin/plugin.json", lambda d: [d["version"]]),
+    (".claude-plugin/marketplace.json", lambda d: [d["version"], d["plugins"][0]["version"]]),
+    (".codex-plugin/plugin.json", lambda d: [d["version"]]),
+    (".agents/plugins/marketplace.json", lambda d: [d["plugins"][0]["version"]]),
+]:
+    vals = getter(json.load(open(os.path.join(root, rel))))
+    if any(v != base_ver for v in vals):
+        mismatches.append(f"{rel} ({vals} != {base_ver})")
+for sp in sorted(glob.glob(os.path.join(root, "skills", "*", "SKILL.md"))):
+    m = re.search(r'^\s*version:\s*"([^"]+)"', open(sp).read(), re.M)
+    v = m.group(1) if m else None
+    if v != base_ver:
+        mismatches.append(f"{os.path.relpath(sp, root)} ({v} != {base_ver})")
+if mismatches:
+    for item in mismatches:
+        print(f"  [VERSION MISMATCH] {item}", file=sys.stderr)
+    sys.exit(1)
+PY
+then
+  ERRORS=$((ERRORS + 1))
+fi
+
 if [[ "$CHECK_ONLY" == "false" && -n "$TARGET_DIR" ]]; then
   if [[ "$TARGET_DIR" == "$PLUGIN_ROOT" ]]; then
     echo "[ERROR] Refusing to link generated agent folders into the plugin source repository itself." >&2
@@ -139,7 +167,7 @@ if [[ "$CHECK_ONLY" == "false" && -n "$TARGET_DIR" ]]; then
 fi
 
 if [[ "$ERRORS" -gt 0 ]]; then
-  echo "[FAIL] Bundle check failed with $ERRORS missing file(s)." >&2
+  echo "[FAIL] Bundle check failed with $ERRORS error(s)." >&2
   exit 1
 fi
 

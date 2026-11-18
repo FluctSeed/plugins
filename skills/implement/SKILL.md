@@ -2,7 +2,7 @@
 name: implement
 description: Executes the tasks defined in an approved track's plan under Phase 2 (Empirical Implementation Mode). Verifies the Stage 3 Human Gate lock, then applies engineering playbooks and 24 principles (domain modeling, reproduce/failing test first, minimal diff, real runtime verification logs, and dual audit logging via git notes and decisions.tsv).
 metadata:
-  version: "0.1.0"
+  version: "0.2.0"
 ---
 
 # Implement Skill (`implement`)

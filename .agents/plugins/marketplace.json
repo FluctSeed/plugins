@@ -7,7 +7,7 @@
     {
       "name": "fluctseed",
       "description": "Spec-driven and empirical AI engineering lifecycle across setup, brainstorm, new-track, implement, review, status, and revert",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "source": "./",
       "policy": {
         "installation": "AVAILABLE"
