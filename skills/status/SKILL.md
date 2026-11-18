@@ -5,73 +5,73 @@ metadata:
   version: "0.1.0"
 ---
 
-# Status Skill (`/status`)
+# Status Skill (`status`)
 
 > [!NOTE]
-> **Path Resolution (`${PLUGIN_ROOT}`):**
-> `${PLUGIN_ROOT}` refers to the root directory of this plugin (two levels above this file: `../../`, or `${CLAUDE_PLUGIN_ROOT}`). When calling filesystem or execution tools, resolve `${PLUGIN_ROOT}` to its absolute path.
+> **Plugin Root & Governance Rules (`${PLUGIN_ROOT}`)**
+> - `${PLUGIN_ROOT}` is the root directory of this plugin (`${CLAUDE_PLUGIN_ROOT}` if expanded by your harness, otherwise two directories above this `SKILL.md` file). Resolve `${PLUGIN_ROOT}` to its absolute path before calling file or shell tools.
 
-You are the **Platform Status Reporter**. Your function is to provide a comprehensive, high-signal overview of the project's progress across all three engineering dimensions:
+You are the **Platform Status Reporter** (strictly read-only). Report a concise dashboard across all three engineering dimensions:
 1. **Track Lifecycle State:** Tracks, phases, and tasks (`[x]`, `[~]`, `[ ]`).
-2. **Design & Gate State:** Zero-context design audit status (`design_audit_report.md`), Stage 3 Human Gate lock (`metadata.json`), and drift reports.
-3. **Execution & Proof State:** Decision trail (`decisions.tsv`) row count/latest entry and latest runtime verification status (`verification.log`).
+2. **Design & Gate State:** Zero-context audit report (`design_audit_report.md`), Stage 3 Human Gate lock + spec/plan hash drift (`metadata.json`), and drift reports (`drift_report.md`).
+3. **Execution & Proof State:** Decision trail (`decisions.tsv`) count/latest entry and latest runtime verification (`verification.log` exit code, Git HEAD, and SHA-256).
 
 ---
 
-## 1. Handshake & Monorepo Conductor Discovery
+## 1. Monorepo Conductor Discovery
 
-1. **Discover All Conductors:**
-   - Run `python3 ${PLUGIN_ROOT}/scripts/prepare_audit_context.py --list-conductors` to discover all `conductor/` directories in the monorepo.
-   - If the user explicitly asks for a specific module in their request (e.g. `/status packages/auth` or "status of auth module"), scope inspection to that directory.
-   - If no `conductor/index.md` is found anywhere, announce that project context is not initialized and ask a **Yes/No question** to run `/setup` (`skills/setup/SKILL.md`).
+1. Run:
+   ```bash
+   python3 "${PLUGIN_ROOT}/scripts/prepare_audit_context.py" --list-conductors
+   ```
+2. If the user requested a specific module (for example `packages/auth`), scope inspection to `<module_path>/conductor`.
+3. If no `conductor/index.md` exists anywhere in the repository, report that project context is uninitialized and ask a single Yes/No question offering to run `${PLUGIN_ROOT}/skills/setup/SKILL.md`.
 
 ---
 
 ## 2. Status Collection Protocol
 
-For each discovered `CONDUCTOR_DIR` (e.g. `./conductor` or `<module_path>/conductor`):
-1. **Read Tracks Registry:**
-   - Parse `<CONDUCTOR_DIR>/tracks.md` (if present) for registered tracks (`- [ ] **Track:`, `- [~] **Track:`, `- [x] **Track:`).
-2. **Inspect Each Track Directory (`<CONDUCTOR_DIR>/tracks/<track_id>/`):**
-   - Run `python3 ${PLUGIN_ROOT}/scripts/gate_check.py --status <track_id_or_path>` to read `metadata.json` and artifact existence flags.
-   - Read `plan.md` to count total phases, total tasks, completed tasks (`[x]`), in-progress tasks (`[~]`), and pending tasks (`[ ]`).
-   - If `decisions.tsv` exists, count the logged decisions and read the last 1–2 rows.
-   - If `verification.log` exists, read the last `[VERIFY END]` line to extract the latest `ExitCode` and `OutputSHA256`.
+For each target `<CONDUCTOR_DIR>`:
+1. Parse `<CONDUCTOR_DIR>/tracks.md` (if present) for registered tracks (`[ ]`, `[~]`, `[x]`).
+2. For each `<TRACK_DIR>` (`<CONDUCTOR_DIR>/tracks/<track_id>`):
+   - Run `python3 "${PLUGIN_ROOT}/scripts/gate_check.py" --status "<TRACK_DIR>" --conductor-dir "<CONDUCTOR_DIR>"` to inspect `metadata.json`, file flags, and `drift` (`spec_drifted_since_lock`, `plan_structure_drifted_since_lock`).
+   - Count phases and `[x]` / `[~]` / `[ ]` tasks in `<TRACK_DIR>/plan.md`.
+   - Count rows and read the latest entry in `<TRACK_DIR>/decisions.tsv` (if present).
+   - Read the last `[VERIFY END]` line in `<TRACK_DIR>/verification.log` (if present) to extract `ExitCode`, `GitHEAD`, and `OutputSHA256`.
 
 ---
 
-## 3. Present Unified Status Dashboard
+## 3. Unified Status Dashboard Output
 
-Output the status overview in clean, unslopped Markdown:
+Render the dashboard in direct Markdown:
 
 ```markdown
 # Project Status Dashboard
 
-- **Timestamp:** `<ISO-8601 current time>`
-- **Monorepo Mode:** `[Single Module | Monorepo Multi-Module (<count> modules)]`
-- **Overall Health:** `[On Track | Awaiting Human Gate | Blocked | Ready for Review]`
+- **Timestamp:** `<ISO-8601>`
+- **Scope:** `[Single Conductor | Monorepo (<count> conductors)]`
+- **Overall Health:** `[On Track | Awaiting Human Gate | Drift Detected | Blocked | Ready for Review]`
 ```
 
-### Monorepo Module Overview (if >1 conductor exists):
+When multiple conductors exist, include the module overview table first:
 
 ```markdown
-| Module / Directory | Tracks (Done/Total) | Active Mode | Stage 3 Gate | Decisions Trail | Latest Runtime Proof |
+| Module / Conductor | Tracks (Done/Total) | Active Mode | Stage 3 Gate | Decisions | Latest Runtime Proof |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `packages/auth` (`packages/auth/conductor/`) | 1 / 2 | Phase 2 (Implementation) | Locked & Approved | 14 rows | PASS (Exit 0) |
-| `packages/billing` (`packages/billing/conductor/`) | 0 / 1 | Phase 1 (Zero-Context Audit) | Pending Developer Gate | 4 rows | - |
-| Root Monorepo (`conductor/`) | 3 / 3 | Stable | Locked & Approved | 38 rows | PASS (Exit 0) |
+| `packages/auth/conductor` | 1 / 2 | Phase 2 (Implementation) | Locked (No Drift) | 14 rows | PASS (Exit 0, HEAD `a1b2c3d`) |
+| `conductor` | 2 / 2 | Verified | Locked (No Drift) | 22 rows | PASS (Exit 0, HEAD `a1b2c3d`) |
 ```
 
-### Active & Recent Tracks Detail:
+Followed by active or recent track details:
 
 ```markdown
-### Track: `<track_id>` (`<type>`) [Module: `<module_path>`]
-- **Active Mode:** `[Phase 1: Spec & Zero-Context Audit | Stage 3: Awaiting Human Gate | Phase 2: Empirical Implementation | Stage 5: Verified / Reviewed]`
-- **Zero-Context Design Audit:** `[Completed (design_audit_report.md) | Pending]`
-- **Stage 3 Human Gate:** `[Locked & Approved | Pending Developer Approval]`
-- **Plan Progress:** `<completed>/<total>` tasks (`<percentage>%`) across `<phases>` phases
-- **Current Task (`[~]`):** `<current in-progress task or None>`
-- **Next Action (`[ ]`):** `<next pending task or Next Lifecycle Command>`
-- **Decisions Logged:** `<count>` entries in `decisions.tsv` (Latest: `<decision>`)
-- **Runtime Proof:** `[Exit Code 0 (SHA: <hash>) in verification.log | Not yet run]`
+### Track: `<track_id>` (`<type>`) [`<CONDUCTOR_DIR>`]
+- **Active Mode:** `[Phase 1 | Awaiting Stage 3 Gate | Phase 2 | Reviewed]`
+- **Zero-Context Design Audit:** `[Completed | Missing]`
+- **Stage 3 Human Gate:** `[Locked & Verified | Spec/Plan Drifted | Pending Approval]`
+- **Plan Progress:** `<done>/<total>` tasks (`<pct>%`) across `<phases>` phases
+- **Current Task (`[~]`):** `<task or None>`
+- **Next Action (`[ ]`):** `<next pending task or next lifecycle command>`
+- **Decisions Logged:** `<count>` rows in `decisions.tsv` (Latest: `<decision>`)
+- **Runtime Proof:** `[Exit <code >, GitHEAD <sha>, OutputSHA256 <hash> | Not yet run]`
 ```

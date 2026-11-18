@@ -1,31 +1,29 @@
 ---
-name: egm-resolve
+name: design-resolve
 license: Apache-2.0
 disable-model-invocation: true
 description: >-
-  The Elephant resolution skill. Ingests flat deficiency reports from
-  concurrent Goldfish reviewers, applies automated fixes for PROPOSE FIX
+  the primary session resolution skill. Ingests flat deficiency reports from
+  concurrent fresh-context reviewers, applies automated fixes for PROPOSE FIX
   items via UI multiple-choice gates, and presents interactive
   negotiation/re-sync checkpoints.
 ---
 
-# Goldfish Review: Resolve
+# fresh-context review: Resolve
 
-When running in Codex or ChatGPT Work, first read [Codex integration](../../docs/codex.md).
-In Claude Code or Cowork, read `${CLAUDE_PLUGIN_ROOT}/docs/claude.md` first.
 
 ## Overview
 
-This skill instructs the agent on how to operate within the primary Elephant
-context window to parse flat deficiency reports from concurrent Goldfish
+This skill instructs the agent on how to operate within the primary Primary Session
+context window to parse flat deficiency reports from concurrent fresh-context reviewer
 reviewers. It defends accurate design choices, applies automated textual
 repairs, and manages interactive negotiation checkpoints.
 
 ## Prerequisites & Context Strategy
 
-*   **Context Recommendation (Elephant Memory)**: This skill should be run in
+*   **Context Recommendation (Primary Session Memory)**: This skill should be run in
     the persistent conversation session that generated the target document (the
-    Elephant) to recall earlier reasoning and craft higher-quality fixes.
+    Primary Session) to recall earlier reasoning and craft higher-quality fixes.
 
 ## Inputs
 
@@ -33,7 +31,7 @@ The caller or orchestration driver provides exactly these parameters:
 
 *   **`TargetFile`**: Absolute or relative path to target document.
 *   **`LineRange`**: Exact line numbers (or `full file`).
-*   **`FindingsList`**: Aggregated flat list of findings from Goldfish
+*   **`FindingsList`**: Aggregated flat list of findings from fresh-context reviewer
     reviewers.
 
 ## Execution Workflow
@@ -84,11 +82,11 @@ Apply these rules:
 ### Step 3: Report Fixes
 
 Construct the final report and save it named
-`goldfish_review_report.md` in the working directory (or your harness's artifact directory, if it has one)
+`design_audit_report.md` in the working directory (or your harness's artifact directory, if it has one)
 using your file-writing tool. Use this layout:
 
 ```markdown
-# Goldfish Annotated Review Report
+# fresh-context reviewer Annotated Review Report
 
 **Target:** `[TargetFile]` (`[LineRange]`)
 
@@ -113,10 +111,10 @@ If any finding is `ESCALATE`, list those findings first in the chat message.
 They need the user's knowledge, not only approval.
 
 Before proceeding, output a visible chat message to the user: *"I have compiled
-the audit findings into `goldfish_review_report.md`. Please review the findings there and choose how you would like to
+the audit findings into `design_audit_report.md`. Please review the findings there and choose how you would like to
 proceed:
 
--   **Comment directly on the file**: Review `goldfish_review_report.md` in
+-   **Comment directly on the file**: Review `design_audit_report.md` in
     chat or the file and leave comments/edits to approve, reject, or contest
     specific items.
 -   **Auto accept**: Reply "auto accept" to batch-apply all proposed fixes
@@ -182,6 +180,6 @@ Interpret the user's action/response as follows:
 1.  **Re-verify Lines**: If changes were made to `TargetFile`, verify that the
     file remains structurally coherent and valid markdown.
 2.  Mark the report as resolved (add a `Status: resolved` line at the top).
-3.  **Handoff**: Exit cleanly back to the caller (such as `egm-review-loop`)
+3.  **Handoff**: Exit cleanly back to the caller (such as `design-review-loop`)
     with the count of accepted fixes, contested items, escalated items,
     declined items, and remaining unaddressed issues.

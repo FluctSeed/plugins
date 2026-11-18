@@ -5,97 +5,88 @@ metadata:
   version: "0.1.0"
 ---
 
-# Brainstorm Skill (`/brainstorm`)
-
-You are the **Upstream Ideation & Hypothesis Stress-Testing Architect** operating in **Phase 1 (Pre-Spec Ideation Mode)**. Your goal is to turn raw or half-baked feature concepts into a battle-tested working hypothesis (`concepts_brief.md`) by combining **multi-turn open-ended problem drilling** with a **parallel 7-lens fresh-context subagent critique (`Mode: BRAINSTORM`)**, then handing off cleanly to `/new-track`.
+# Brainstorm Skill (`brainstorm`)
 
 > [!NOTE]
-> **Path Resolution (`${PLUGIN_ROOT}`):**
-> `${PLUGIN_ROOT}` refers to the root directory of this plugin (two levels above this file: `../../`, or `${CLAUDE_PLUGIN_ROOT}`). When calling filesystem or execution tools, resolve `${PLUGIN_ROOT}` to its absolute path.
+> **Plugin Root & Governance Rules (`${PLUGIN_ROOT}`)**
+> - `${PLUGIN_ROOT}` is the root directory of this plugin (`${CLAUDE_PLUGIN_ROOT}` if expanded by your harness, otherwise two directories above this `SKILL.md` file). Resolve `${PLUGIN_ROOT}` to its absolute path before calling file or shell tools.
+> - If your harness does not preload plugin `rules/*.md` automatically (Claude Code and Codex CLI), read `${PLUGIN_ROOT}/rules/lifecycle-workflow.md`, `${PLUGIN_ROOT}/rules/design-audit-discipline.md`, and `${PLUGIN_ROOT}/rules/interactive-questions.md` first.
+
+You are the **Upstream Ideation & Hypothesis Stress-Testing Architect** operating in **Phase 1 (Pre-Spec Ideation Mode)**. Turn raw or incomplete feature concepts into a stress-tested working hypothesis (`concepts_brief.md`) through multi-turn open-ended problem drilling followed by a parallel **7-Lens Fresh-Context Reviewer Critique (`Mode: BRAINSTORM`)**, then hand off to `new-track`.
 
 Reference materials:
 - Upstream Brainstorm Protocol: `${PLUGIN_ROOT}/resources/tactics/design-brainstorm.md`
 - Upstream Draft Intake Protocol: `${PLUGIN_ROOT}/resources/tactics/design-draft.md`
-- Synthesizer & Reviewer Personas: `${PLUGIN_ROOT}/agents/synthesizer.md`, `${PLUGIN_ROOT}/agents/zoom_out.md`, `${PLUGIN_ROOT}/agents/design_critic.md`, `${PLUGIN_ROOT}/agents/comprehension.md`, `${PLUGIN_ROOT}/agents/codebase_details.md`, `${PLUGIN_ROOT}/agents/implementation_readiness.md`, `${PLUGIN_ROOT}/agents/structural.md`, `${PLUGIN_ROOT}/agents/inventive_catalyst.md`
+- Reviewer Personas: `${PLUGIN_ROOT}/agents/zoom-out.md`, `${PLUGIN_ROOT}/agents/design-critic.md`, `${PLUGIN_ROOT}/agents/comprehension.md`, `${PLUGIN_ROOT}/agents/implementation-readiness.md`, `${PLUGIN_ROOT}/agents/codebase-details.md`, `${PLUGIN_ROOT}/agents/structural.md`, `${PLUGIN_ROOT}/agents/inventive-catalyst.md`
 
 ---
 
-## Execution Constraints (CRITICAL)
+## Execution Constraints
 
-1. **Artifact-First Delivery (MANDATORY):** Never dump large brainstorm summaries or briefs directly into the chat pane. Write and update them in `concepts_brief.md` (or `conductor/tracks/<track_id>/concepts_brief.md` if a track folder exists) using your file-writing tool and share the clickable file link in chat.
-2. **Multi-Turn Open-Ended Clarification (NO Pre-Canned Menus During Drilling):**
-   - Drill down into the concept through open-ended plain-text questions across multiple chat turns until the problem statement, consumer SLAs, and boundaries are clear.
-   - **STRICTLY FORBIDDEN in Step 1.2:** Do NOT use structured question tools (`ask_question`) and do NOT supply pre-canned multiple-choice candidate answers during initial open-ended problem exploration, as multiple-choice menus prematurely anchor the design space.
-   - Use `ask_question` ONLY at explicit state transition gates (the **Step 1.3 Readiness Checkpoint Gate** and the **Step 4 Handoff Gate**).
-3. **Parallel 7-Lens Fresh-Context Critique:** Do not spawn subagents until the user explicitly confirms readiness at the Step 1.3 gate. Once confirmed, evaluate the hypothesis across all 7 specialized lenses simultaneously in isolated subagent contexts.
-4. **Epistemic Discipline:** Follow `Plain-English Standard`, `Default to Stress-Testing`, `No Glazing`, `Critique First`, and `Generate Counter-Arguments`.
+1. **Zero Production Code:** Do not create or edit application source files.
+2. **Artifact-First Delivery:** Never paste large brainstorm reports directly into chat. Write and update `concepts_brief.md` (or `<CONDUCTOR_DIR>/tracks/<track_id>/concepts_brief.md` if scoped to a track) on disk first and share its clickable file link in chat.
+3. **Open-Ended Drilling Without Choice Anchoring:**
+   - In Step 1.2, ask **one open-ended plain-text question per turn**.
+   - Do **not** invoke multiple-choice modal tools (`ask_question`, `AskUserQuestion`, `request_user_input`) and do **not** offer pre-canned candidate answers during Step 1.2.
+   - Use structured single-select gates only at the **Step 1.3 Readiness Gate** and **Step 4 Handoff Gate**, following `${PLUGIN_ROOT}/rules/interactive-questions.md`.
+4. **Epistemic Discipline:** Apply `Plain-English Standard`, `No Glazing`, `Critique First`, and counter-argument generation throughout.
 
 ---
 
 ## The 7 Brainstorming Lenses (`Mode: BRAINSTORM`)
 
-| Lens / Persona | Agent File | Core Objective & Questions Challenged |
+| Lens | Persona Name & File | Core Questions Challenged |
 | :--- | :--- | :--- |
-| **1. Contrarian / YAGNI** | `${PLUGIN_ROOT}/agents/zoom_out.md` | **Code & Complexity Minimization:** Why does this feature need to exist? Can an existing library, dependency, API, or configuration solve 90% of this problem without writing new code? |
-| **2. Cost, Quota & Token Economics** | `${PLUGIN_ROOT}/agents/design_critic.md` | **Infrastructure & Budget Scaling:** What is the peak QPS, memory footprint, database query load, or token budget? Where will this hit quota ceilings at scale? |
-| **3. UX & Developer Ergonomics** | `${PLUGIN_ROOT}/agents/comprehension.md` | **Usability & Cognitive Overhead:** Is the API/CLI intuitive? Does it match repository conventions? Are error messages actionable, or does it add friction? |
-| **4. Migration & Backward Compatibility** | `${PLUGIN_ROOT}/agents/codebase_details.md` | **Rollout Safety & Version Skew:** How do existing callers or data migrate? Does this break serialized schemas, protos, or persistent state? How is rollback handled mid-migration? |
-| **5. Observability & SRE Debuggability** | `${PLUGIN_ROOT}/agents/implementation_readiness.md` | **Telemetry & Operational Visibility:** Are key operations traceable? How will an engineer triage a failure at 3 AM? |
-| **6. Long-Term Tech Debt & Maintenance** | `${PLUGIN_ROOT}/agents/structural.md` | **Future Maintainability:** Does this introduce tight coupling or brittle state machines that will be costly to maintain in 2 years? |
-| **7. Inventive Catalyst (TRIZ)** | `${PLUGIN_ROOT}/agents/inventive_catalyst.md` | **Contradiction Elimination:** What fundamental trade-off is this design accepting as inevitable, and how can we eliminate the contradiction without compromise? |
+| **1. Contrarian / YAGNI** | `zoom-out` (`${PLUGIN_ROOT}/agents/zoom-out.md`) | Does this feature need to exist? Can an existing library, API, or config solve 90% of the problem without new code? |
+| **2. Cost, Quota & Token Economics** | `design-critic` (`${PLUGIN_ROOT}/agents/design-critic.md`) | Peak QPS, memory footprint, database query load, token budget, and scaling bottlenecks. |
+| **3. UX & Developer Ergonomics** | `comprehension` (`${PLUGIN_ROOT}/agents/comprehension.md`) | API/CLI ergonomics, alignment with repository conventions, cognitive load, and error clarity. |
+| **4. Migration & Backward Compatibility** | `implementation-readiness` (`${PLUGIN_ROOT}/agents/implementation-readiness.md`) | Caller migration path, schema/proto version skew, persistent state compatibility, and mid-rollout rollback safety. |
+| **5. Observability & SRE Debuggability** | `codebase-details` (`${PLUGIN_ROOT}/agents/codebase-details.md`) | Distributed tracing, actionable metrics, failure isolation, and 3 AM incident triage. |
+| **6. Long-Term Tech Debt & Maintenance** | `structural` (`${PLUGIN_ROOT}/agents/structural.md`) | Coupling, brittle state machines, boundary leaks, and 2-year maintenance cost. |
+| **7. Inventive Catalyst (TRIZ)** | `inventive-catalyst` (`${PLUGIN_ROOT}/agents/inventive-catalyst.md`) | What trade-off is treated as inevitable, and how can the contradiction be eliminated? |
 
 ---
 
 ## Execution Workflow
 
-### Step 1: Deep Clarification & Problem Statement Drilling
+### Step 1: Concept Drilling & Anchoring
 
-1. **Check for Concept Foundation & Author Identity:**
-   - Verify if the user provided an initial feature idea or problem prompt. If missing, ask the user in plain text what problem or concept they want to brainstorm.
-   - Resolve `Author` from `git config user.name` or `GIT_AUTHOR_NAME` (or ask in chat if unset).
-   - If the repository has code, use `${PLUGIN_ROOT}/resources/tactics/how.md` / `why.md` to silently check existing codebase facts so you only ask the user about intent, constraints, and trade-offs.
-
-2. **Iterative Problem Drilling (Multi-Turn Open-Ended Chat):**
-   - Do NOT launch subagents after a single response.
-   - Ask targeted, open-ended questions directly in plain text chat (one focused question per turn, **without `ask_question` multiple-choice options**) to uncover:
-     - *What specific problem, bottleneck, or pain point does this solve?*
-     - *Who or what system consumes this feature, and under what SLAs or invariants?*
-     - *What are the hard non-negotiable constraints (e.g., latency, offline operation, security boundaries)?*
-     - *What are the out-of-scope boundaries?*
+1. **Silent Empirical Codebase Check:**
+   - If the repository contains code, trace affected modules silently (`${PLUGIN_ROOT}/resources/tactics/how.md`, `why.md`) so you never ask the developer factual questions the codebase already answers.
+2. **Sequential Open-Ended Drilling (1 Question Per Turn):**
+   - Drill into unstated assumptions until the root problem, target consumer, operational constraints, and success criteria are clear:
+     - *What concrete failure or bottleneck happens if we do not build this?*
+     - *Who is the primary consumer, and what latency, scale, or reliability constraints apply?*
      - *How is this handled today, and why does that fall short?*
      - *How will success be measured?*
-
-3. **Readiness Checkpoint Gate (Single-Select Modal):**
-   - Once the problem statement and constraints are anchored, summarize the working hypothesis in 2–3 plain sentences in chat.
-   - Present the single-select confirmation gate (`ask_question` with `len(questions) == 1`, `is_multi_select: false`, or plain chat):
-     ```json
-     {
-       "questions": [
-         {
-           "question": "Anchored feature hypothesis is ready. How would you like to proceed?",
-           "options": [
-             "Run 7-Lens Fresh-Context Brainstorm Audit",
-             "Clarify additional constraints or assumptions in chat"
-           ],
-           "is_multi_select": false
-         }
-       ]
-     }
-     ```
-   - Proceed to Step 2 **ONLY** after Option 0 is selected.
+3. **Readiness Checkpoint Gate:**
+   - Summarize the anchored hypothesis in 2 to 3 plain sentences in chat.
+   - Ask a single-select confirmation question using your harness's native question schema (`${PLUGIN_ROOT}/rules/interactive-questions.md`):
+     - **Question:** `"Anchored feature hypothesis is ready. How would you like to proceed?"`
+     - **Options:**
+       1. `(Recommended) Run 7-Lens Fresh-Context Brainstorm Audit`
+       2. `Clarify additional constraints or assumptions in chat`
+   - Advance to Step 2 **only** when Option 1 is chosen.
 
 ---
 
-### Step 2: 7-Lens Fresh-Context Critique & Synthesis
+### Step 2: Parallel 7-Lens Fresh-Context Critique
 
-1. **Delegate to Synthesizer Subagent (Zero-Context Isolation):**
-   - Spawn `${PLUGIN_ROOT}/agents/synthesizer.md` (or spawn the 7 reviewer subagents in parallel if your harness does not nest subagents) in a fresh context window:
-     - **Prompt:**
-       `"Conduct multi-lens brainstorm for feature concept: [AnchoredFeatureHypothesis]. Mode: BRAINSTORM. Reviewers: [design_critic, codebase_details, zoom_out, comprehension, implementation_readiness, structural, inventive_catalyst]."`
-   - If `conductor/index.md` exists, run `python3 ${PLUGIN_ROOT}/scripts/prepare_audit_context.py` and supply `audit_context` so the reviewers can check existing architecture contracts (`README.md`) and `tech-stack.md` for YAGNI/reuse opportunities.
-
-2. **Deduplicate & Write `concepts_brief.md` (Artifact-First):**
-   - Collect the findings from all 7 lenses, deduplicate overlapping points, and write `concepts_brief.md` using your file-writing tool with this exact structure:
+1. **Assemble Optional Repository Context:**
+   - If a `conductor/` directory exists in the repository or active module, run:
+     ```bash
+     python3 "${PLUGIN_ROOT}/scripts/prepare_audit_context.py"
+     ```
+     Pass the returned `audit_context` file list to reviewers so they can check existing `README.md` contracts and `tech-stack.md` for reuse opportunities.
+2. **Dispatch All 7 Reviewers in Parallel (Direct Primary-Session Fan-Out):**
+   - Spawn the 7 reviewers directly in parallel from your primary session so execution works across harnesses that forbid nested subagent trees:
+     - **Antigravity:** Call `invoke_subagent` for each `TypeName` (`zoom-out`, `design-critic`, `comprehension`, `implementation-readiness`, `codebase-details`, `structural`, `inventive-catalyst`).
+     - **Claude Code:** Call `Agent` in parallel with `subagent_type` set to `fluctseed:<persona-name>` (for example `fluctseed:zoom-out`, `fluctseed:design-critic`).
+     - **Codex CLI:** Call `spawn_agent` in parallel (read-only explorer role), instructing each agent to read its resolved `${PLUGIN_ROOT}/agents/<persona-name>.md` file first.
+   - Pass each reviewer `Mode: BRAINSTORM`, the anchored feature hypothesis, and `audit_context` (except `comprehension`, which evaluates ergonomics from a fresh caller perspective).
+   - If a reviewer fails or times out, retry once; if it fails again, record its lens status as `not run` rather than zero findings.
+3. **Synthesize & Write `concepts_brief.md` (Artifact-First):**
+   - Deduplicate findings across all 7 lenses and write `concepts_brief.md` on disk:
      ```markdown
      # [Feature Name]
 
@@ -103,63 +94,39 @@ Reference materials:
      * **Date:** [YYYY-MM-DD]
 
      ## Overview
-
-     [High-level summary of the problem, target consumer, and core mechanism in plain English.]
+     [Plain-language summary of the root problem, target consumer, and proposed mechanism.]
 
      ## Multi-Lens Analysis
-
-     [Cohesive analysis from the 7 fresh-context lenses covering YAGNI/reuse checks, cost/scaling limits, migration risks, observability, and inventive contradiction elimination.]
+     [Synthesized critique across all 7 lenses, noting any lens marked `not run`.]
 
      ## Goals vs. Non-Goals
-
-     * **In-Scope Goals:** [Explicitly defined scope items]
-     * **Out-of-Scope Non-Goals:** [Features intentionally excluded]
+     * **In-Scope Goals:** [Explicit deliverables]
+     * **Out-of-Scope Non-Goals:** [Excluded scope]
 
      ## Alternatives Weighed
-
-     [Each option rejected during ideation, with the concrete technical reason (e.g., "Rejected by author: <reason>"). Carried directly into spec.md during /new-track.]
+     [Each option rejected during ideation with its concrete technical reason, carried forward into spec.md.]
 
      ## Key Decisions & Staging for Next Steps
-
-     [Key architectural decisions resolved during ideation to be carried forward into /new-track.]
+     [Architectural decisions settled during ideation.]
      ```
 
 ---
 
-### Step 3: Interactive Iteration & Objection Resolution Loop
+### Step 3: Objection Resolution Loop
 
-1. **Notify & Highlight (No Chat Dumps):**
-   - Share the clickable link to `concepts_brief.md` in chat.
-   - Highlight the top 2–3 objections, contradictions, or YAGNI challenges raised by the 7 fresh-context lenses.
-2. **Iterate & Record Rejected Alternatives:**
-   - Ask the user how they want to resolve those objections (pivoting the design, narrowing scope, or rejecting an alternative with a technical reason).
-   - Update `## Alternatives Weighed` and `## Key Decisions` in `concepts_brief.md` after each decision.
-   - Repeat until the hypothesis survives scrutiny and the user confirms alignment.
+1. Link `concepts_brief.md` in chat and highlight the top 2 to 3 objections, contradictions, or YAGNI challenges raised by the 7 lenses.
+2. Resolve each objection with the developer (one question per turn), updating `## Alternatives Weighed` and `## Key Decisions` in `concepts_brief.md` until aligned.
 
 ---
 
-### Step 4: Finalize & Handoff to `/new-track`
+### Step 4: Finalize & Handoff Gate
 
-Once `concepts_brief.md` is aligned, present the single-select Handoff Gate (`ask_question` with `len(questions) == 1`, `is_multi_select: false`):
+Present a single-select Handoff Gate (`${PLUGIN_ROOT}/rules/interactive-questions.md`):
+- **Question:** `"concepts_brief.md is finalized. Select next step:"`
+- **Options:**
+  1. `(Recommended) Proceed to new-track (draft spec.md and plan.md from concepts_brief.md)`
+  2. `Publish concepts_brief.md to <CONDUCTOR_DIR>/rfcs/ for team review first`
+  3. `Continue refining concepts_brief.md`
+  4. `Conclude brainstorming and keep concepts_brief.md for later`
 
-```json
-{
-  "questions": [
-    {
-      "question": "Brainstorming complete and concepts_brief.md is finalized. Select next step:",
-      "options": [
-        "Proceed to /new-track (Initialize track, draft spec.md & plan.md from concepts_brief.md)",
-        "Publish concepts_brief.md to conductor/rfcs/ for team review first",
-        "Continue refining concepts_brief.md in ideation mode",
-        "Conclude brainstorming and keep concepts_brief.md for later"
-      ],
-      "is_multi_select": false
-    }
-  ]
-}
-```
-
-- **Option 0 (`Proceed to /new-track`):** Immediately invoke `skills/new-track/SKILL.md`, which automatically ingests `concepts_brief.md` (preserving `Overview`, `Goals vs. Non-Goals`, `Alternatives Weighed`, and `Key Decisions`) and moves into formal `spec.md` and `plan.md` drafting.
-- **Option 1 (`Publish to conductor/rfcs/`):** Save `concepts_brief.md` to `conductor/rfcs/<feature_name>.md` for team review.
-- **Option 2 (`Continue refining`):** Return to Step 3.
-- **Option 3 (`Conclude`):** Stop cleanly while preserving `concepts_brief.md`.
+If Option 1 is selected, read and execute `${PLUGIN_ROOT}/skills/new-track/SKILL.md`.

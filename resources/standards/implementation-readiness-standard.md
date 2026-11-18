@@ -28,7 +28,7 @@ The plan must detail these areas if applicable to the proposed changes:
 
 *   **Target Scope & File Boundary**: Explicit list of exact repository-relative
     file paths to be created, modified, or deleted, suitable for enforcing a
-    Phase 5 write allowlist without unapproved adjacent refactors or
+    Phase 2 target file scope without unapproved adjacent refactors or
     opportunistic dependency additions. Use a directory glob only for generated
     output whose filenames can't be known in advance.
 *   **Actionable Steps**: Precise logic changes, data transformations, and API

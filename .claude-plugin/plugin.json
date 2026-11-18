@@ -1,36 +1,19 @@
 {
   "name": "fluctseed",
-  "displayName": "Fluctseed AI Engineering Platform",
   "version": "0.1.0",
-  "description": "Spec-Driven and Empirical AI Engineering Platform across /setup, /brainstorm, /new-track, /implement, /review, /status, and /revert.",
+  "description": "Spec-driven and empirical AI engineering lifecycle across /fluctseed:setup, /fluctseed:brainstorm, /fluctseed:new-track, /fluctseed:implement, /fluctseed:review, /fluctseed:status, and /fluctseed:revert.",
   "author": {
-    "name": "Fluctseed AI Platform Architecture Team"
+    "name": "FluctSeed",
+    "url": "https://github.com/FluctSeed"
   },
+  "homepage": "https://github.com/FluctSeed/plugins",
+  "repository": "https://github.com/FluctSeed/plugins",
   "license": "Apache-2.0",
   "keywords": [
     "spec-driven-development",
     "design-review",
     "empirical-engineering",
     "tdd",
-    "code-review",
-    "agent-skills"
-  ],
-  "skills": "./skills",
-  "rules": "./rules",
-  "icon": "./assets/icon.svg",
-  "agents": [
-    "./agents/bootstrap_orchestrator.md",
-    "./agents/codebase_details.md",
-    "./agents/comprehension.md",
-    "./agents/design_critic.md",
-    "./agents/implementation_readiness.md",
-    "./agents/inventive_catalyst.md",
-    "./agents/structural.md",
-    "./agents/style.md",
-    "./agents/synthesizer.md",
-    "./agents/zoom_out.md",
-    "./agents/implementer.md",
-    "./agents/comment_auditor.md"
-  ],
-  "repository": "https://github.com/FluctSeed/plugins"
+    "code-review"
+  ]
 }

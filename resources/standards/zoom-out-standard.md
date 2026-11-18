@@ -24,7 +24,7 @@ implementation details.
     not just apply a local band-aid to symptoms.
 *   **Project Alignment**: The design must align with the high-level goals and
     architectural philosophy defined in the project's root documentation
-    (`README.md` or `context.md`).
+    (`README.md` or `conductor/product.md`).
 
 ## 2. Simplicity & Extensibility
 

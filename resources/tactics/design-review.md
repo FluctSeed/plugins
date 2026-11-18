@@ -1,9 +1,9 @@
 ---
-name: egm-review
+name: design-review
 license: Apache-2.0
 disable-model-invocation: true
 description: >-
-  Orchestrates the EGM Goldfish Review Protocol. Used as part of the EGM
+  Orchestrates the Fluctseed fresh-context review Protocol. Used as part of the Fluctseed
   process to perform design document reviews. Executes five review phases:
   Initial Zoom Out Review, Comprehension Review, Design Critique, Intermediate
   Zoom Out Review, and Implementation Readiness.
@@ -11,21 +11,19 @@ description: >-
 
 # Review, Validation & Automated Remediation
 
-When running in Codex or ChatGPT Work, first read [Codex integration](../../docs/codex.md).
-In Claude Code or Cowork, read `${CLAUDE_PLUGIN_ROOT}/docs/claude.md` first.
 
 Reviews and validates a design document through specialized reviewer personas.
 
 ## Delegation
 
-A Goldfish runs in a fresh context with no conversation history. Spawn each
+A fresh-context reviewer runs in a fresh context with no conversation history. Spawn each
 subagent with your harness's subagent tool (Antigravity: `invoke_subagent`; Claude Code: `Agent`; Codex: `spawn_agent`). Each subagent is defined in `agents/<file>.md`, and its
-frontmatter `name` (for example `egm-zoom-out`) is the subagent type to request
+frontmatter `name` (for example `zoom-out`) is the subagent type to request
 where your harness registers named subagents. Otherwise spawn a general-purpose
 subagent and tell it to read that persona file first. Pass the prompt verbatim
 and wait for the report. If your harness cannot nest subagents,
-use direct dispatch instead of the synthesizer. See `docs/harnesses.md`.
-If your harness has no subagent tool, stop and tell the user: a review in the same context is not a Goldfish review.
+use direct dispatch instead of the synthesizer. Follow `rules/lifecycle-workflow.md` and `rules/interactive-questions.md`.
+If your harness has no subagent tool, stop and tell the user: a review in the same context is not a fresh-context review.
 
 ## Execution Constraints (CRITICAL)
 
@@ -71,7 +69,7 @@ If your harness has no subagent tool, stop and tell the user: a review in the sa
 ## Inputs
 
 *   **`TargetFile`**: Absolute or relative path to the design document.
-*   **`GoldfishContext`** (Optional): Reading list to establish the system
+*   **`AuditContext`** (Optional): Reading list to establish the system
     baseline. If omitted, it holds only the linked files that Step 1.3 adds.
 *   **`Step` (Optional)**: Specific pipeline preset or stage to run (e.g.
     `interactive`, `uninterrupted`, `feature_spec`, `implementation`, or an
@@ -88,10 +86,10 @@ If your harness has no subagent tool, stop and tell the user: a review in the sa
         use structured question tools such as `ask_question`, as providing an
         arbitrary file path is an open-ended text input, not a choice between
         fixed options) and end your turn.
-2.  Once `TargetFile` is provided, verify if `GoldfishContext` is provided (an
+2.  Once `TargetFile` is provided, verify if `AuditContext` is provided (an
     empty list counts as provided, as does the user explicitly stating in their
     prompt to proceed with no additional context). If missing:
-    *   Explain to the user that goldfish context (reading list of files) is
+    *   Explain to the user that audit context (reading list of files) is
         optional, but can establish baseline knowledge for reviewers.
     *   Clarify that linked files inside the working directory are added
         automatically, and that other links and URLs need approval.
@@ -100,22 +98,22 @@ If your harness has no subagent tool, stop and tell the user: a review in the sa
         open-ended file paths.
 3.  **Linked Files (run later)**: Do not run this during intake. Run it once,
     after the Step 2 preset is chosen and right before the first stage that
-    takes `GoldfishContext` (any stage but Stage 6), in any flow including
+    takes `AuditContext` (any stage but Stage 6), in any flow including
     `uninterrupted`. Read `TargetFile`, skip anchor-only links (`#...`), drop
     the `#fragment` from other links, and resolve each relative link against
     the design document's folder. Add each link whose real path (after
     following symbolic links) stays inside the working directory to
-    `GoldfishContext`, skipping files that do not exist. If any link resolves
+    `AuditContext`, skipping files that do not exist. If any link resolves
     outside the working directory or is a URL, list those links in chat as
     regular text, ask which to include, and end your turn; if no one can
     answer, as in a headless run, leave them all out and keep going. Add only
     approved ones and tell the user which were left out. Some reviewers cannot
-    open URLs, so save the raw page of each URL in `GoldfishContext` as a new
+    open URLs, so save the raw page of each URL in `AuditContext` as a new
     file in the working directory (or your harness's artifact directory) and
     pass its absolute path instead. If a page cannot be saved, ask the user for
     a local copy and end your turn; if no one can answer, as in a headless run,
     leave it out, tell the user, and keep going. Pass
-    `GoldfishContext` to every stage except Stage 6, which reads the document
+    `AuditContext` to every stage except Stage 6, which reads the document
     alone; tell any synthesizer to give these files to each reviewer.
 
 ### Step 2: Curated Pipeline Preset Selection
@@ -167,7 +165,7 @@ If your harness has no subagent tool, stop and tell the user: a review in the sa
     *   **Preset 1: `Consolidated report with all review rubrics`**: Proceed to
         Step 3 to discover the semantic split, then execute all five stages
         without pausing for checkpoints, consolidating findings into
-        `consolidated_review_report.md`.
+        `design_audit_report.md`.
     *   **Preset 2: `Feature spec only`**: **Bypass Step 3 semantic split
         discovery entirely**. Set `FeatureRange = 1..End`, set `DetailedRange =
         N/A`, and execute Stages 5, 6, 7, and 8 with checkpoints. Cleanly halt
@@ -250,12 +248,12 @@ plain chat):
             chat when edits are complete to re-run)`.
         *   Option 3: `Pause Review (save progress and exit)`.
 2.  **Resolution Semantics (Option 1 for Stages 7 and 9)**:
-    *   **Hand-off to Resolver**: The agent invokes `egm-resolve` in the primary
-        Elephant context window on the target range (`FeatureRange` or
+    *   **Hand-off to Resolver**: The agent invokes `design-resolve` in the primary
+        Primary Session context window on the target range (`FeatureRange` or
         `DetailedRange`), passing the parsed findings from `critic_report.md` or
         `implementation_readiness_report.md`.
-    *   **Resolution Workflow**: The Elephant classifies each finding (`PROPOSE
-        FIX` vs `CONTEST`), writes `goldfish_review_report.md`, and executes
+    *   **Resolution Workflow**: the primary session classifies each finding (`PROPOSE
+        FIX` vs `CONTEST`), writes `design_audit_report.md`, and executes
         approved edits on `TargetFile` via file editing tools.
     *   **Convergence**: After applying fixes, re-read `TargetFile` to
         recalculate line bounds, and either advance to the next stage or re-run
@@ -282,24 +280,24 @@ plain chat):
 1.  **Uninterrupted Stage Execution**: Execute all five review stages in
     sequence without interactive checkpoint pauses between steps. For each
     stage, write the individual report file to the working directory (or your
-    harness's artifact directory, if it has one). Pass `GoldfishContext` to
+    harness's artifact directory, if it has one). Pass `AuditContext` to
     every step except Step 6.
-    *   **Step 5 (Initial Zoom Out)**: Spawn `egm-synthesizer` (or direct
-        subagent) with `Reviewers: [egm-zoom-out, egm-inventive-catalyst]` on
+    *   **Step 5 (Initial Zoom Out)**: Spawn `synthesizer` (or direct
+        subagent) with `Reviewers: [zoom-out, inventive-catalyst]` on
         `full file` → write `zoom_out_report.md`.
-    *   **Step 6 (Comprehension Test)**: Spawn the `egm-comprehension`
+    *   **Step 6 (Comprehension Test)**: Spawn the `comprehension`
         subagent directly (not the synthesizer) on `FeatureRange` &
         `DetailedRange` → write its complete result to
         `comprehension_report.md`.
-    *   **Step 7 (Critic Review)**: Spawn `egm-synthesizer` (or direct
-        subagents) with `Reviewers: [egm-design, egm-structural, egm-style]` on
+    *   **Step 7 (Critic Review)**: Spawn `synthesizer` (or direct
+        subagents) with `Reviewers: [design-critic, structural, style]` on
         `FeatureRange` → write `critic_report.md`.
-    *   **Step 8 (Intermediate Zoom Out)**: Spawn `egm-synthesizer` (or direct
-        subagent) with `Reviewers: [egm-zoom-out]` on `full file` → write
+    *   **Step 8 (Intermediate Zoom Out)**: Spawn `synthesizer` (or direct
+        subagent) with `Reviewers: [zoom-out]` on `full file` → write
         `intermediate_zoom_out_report.md`.
-    *   **Step 9 (Implementation Readiness Test)**: Spawn `egm-synthesizer` (or
-        direct subagents) with `Reviewers: [egm-implementation-readiness,
-        egm-codebase-details, egm-style]` on `DetailedRange` → write
+    *   **Step 9 (Implementation Readiness Test)**: Spawn `synthesizer` (or
+        direct subagents) with `Reviewers: [implementation-readiness,
+        codebase-details, style]` on `DetailedRange` → write
         `implementation_readiness_report.md`.
 2.  **Cross-Stage Synthesis & Deduplication**:
     *   Collect all findings across the 5 stage reports.
@@ -307,22 +305,22 @@ plain chat):
         Major, 🟢 Nit).
     *   Build a Traceability Matrix mapping raw findings to consolidated action
         items.
-3.  **Deliverable Delivery**: Write to `consolidated_review_report.md` using
+3.  **Deliverable Delivery**: Write to `design_audit_report.md` using
     your file-writing tool.
 4.  **Notify User**: Output a concise chat notification pointing to
-    `consolidated_review_report.md` (give its path).
+    `design_audit_report.md` (give its path).
 
 ### Subflow: Zoom Out Review
 
-1.  **Delegate to Synthesizer Subagent**: Spawn `egm-synthesizer` (or the
-    specialized `egm-zoom-out` subagent at `agents/zoom_out.md`) on `full file`
-    applying `resources/document_standards/zoom-out-standard.md`. When running
+1.  **Delegate to Synthesizer Subagent**: Spawn `synthesizer` (or the
+    specialized `zoom-out` subagent at `agents/zoom-out.md`) on `full file`
+    applying `resources/standards/zoom-out-standard.md`. When running
     as Step 8 (Intermediate Zoom Out), include `zoom_out_report.md` path in
     context and focus on additions/mitigations from Comprehension and Critic
     stages. When running as Step 5, also
-    spawn `egm-inventive-catalyst` in parallel and write both into
+    spawn `inventive-catalyst` in parallel and write both into
     `zoom_out_report.md`.
-    In both Stage 5 and Stage 8, pass `GoldfishContext`.
+    In both Stage 5 and Stage 8, pass `AuditContext`.
 2.  **Delivery**: Write findings to `zoom_out_report.md` (Stage 5) or
     `intermediate_zoom_out_report.md` (Stage 8) using your file-writing tool.
 3.  **Notify User (No Chat Dumps)**: Notify user that findings are written to
@@ -348,7 +346,7 @@ plain chat):
 
 ### Subflow: Comprehension Test
 
-1.  **Spawn the Reviewer Directly**: Spawn the `egm-comprehension` subagent
+1.  **Spawn the Reviewer Directly**: Spawn the `comprehension` subagent
     at `agents/comprehension.md` on `FeatureRange` & `DetailedRange` with no
     document standard. Do not use the synthesizer: its report keeps only
     findings, and the author must see the paraphrase. The test is self-containment,
@@ -370,10 +368,10 @@ plain chat):
 
 ### Subflow: Critic Review
 
-1.  **Invoke Antagonistic Review Loop**: Invoke `egm-review-loop` in-thread on
-    `FeatureRange` with reviewers `[egm-design, egm-structural, egm-style]`,
-    standards `{"egm-design": "feature-spec-standard", "egm-structural":
-    "feature-spec-standard"}`, and `GoldfishContext`.
+1.  **Invoke Antagonistic Review Loop**: Invoke `design-review-loop` in-thread on
+    `FeatureRange` with reviewers `[design-critic, structural, style]`,
+    standards `{"design-critic": "feature-spec-standard", "structural":
+    "feature-spec-standard"}`, and `AuditContext`.
 2.  **Notify User (No Chat Dumps)**: Notify user that findings are written to
     `critic_report.md` (give its path).
 3.  **Checkpoint Gate**: Present the Stage 7 gate:
@@ -387,9 +385,9 @@ plain chat):
         when edits are complete to re-run)"`
     *   Option 3: `"Pause Review (save progress and exit)"`
 4.  **Remediation & Resolution (Option 1)**:
-    *   Invoke `egm-resolve` in the primary Elephant context on `FeatureRange`,
+    *   Invoke `design-resolve` in the primary Primary Session context on `FeatureRange`,
         passing findings from `critic_report.md` (or
-        `goldfish_review_report.md`).
+        `design_audit_report.md`).
     *   Execute approved fixes directly on `TargetFile` using file editing
         tools.
     *   After fixes are applied, re-read `TargetFile` to recalculate line
@@ -397,12 +395,12 @@ plain chat):
 
 ### Subflow: Implementation Readiness Test
 
-1.  **Invoke Antagonistic Review Loop**: Invoke `egm-review-loop` in-thread on
-    `DetailedRange` with reviewers `[egm-implementation-readiness,
-    egm-codebase-details, egm-style]` and standards
-    `{"egm-implementation-readiness": "implementation-readiness-standard",
-    "egm-codebase-details": "implementation-readiness-standard"}`, and
-    `GoldfishContext`.
+1.  **Invoke Antagonistic Review Loop**: Invoke `design-review-loop` in-thread on
+    `DetailedRange` with reviewers `[implementation-readiness,
+    codebase-details, style]` and standards
+    `{"implementation-readiness": "implementation-readiness-standard",
+    "codebase-details": "implementation-readiness-standard"}`, and
+    `AuditContext`.
 2.  **Notify User (No Chat Dumps)**: Notify user that findings are written to
     `implementation_readiness_report.md` (give its path).
 3.  **Terminal Checkpoint Gate**: Present the Stage 9 terminal gate:
@@ -416,9 +414,9 @@ plain chat):
         when edits are complete to re-run)"`
     *   Option 3: `"Pause Review (save progress and exit)"`
 4.  **Remediation & Resolution (Option 1)**:
-    *   Invoke `egm-resolve` in the primary Elephant context on `DetailedRange`,
+    *   Invoke `design-resolve` in the primary Primary Session context on `DetailedRange`,
         passing findings from `implementation_readiness_report.md` (or
-        `goldfish_review_report.md`).
+        `design_audit_report.md`).
     *   Execute approved fixes directly on `TargetFile` using file editing
         tools.
     *   After fixes are applied, re-read `TargetFile` to recalculate line

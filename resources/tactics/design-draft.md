@@ -1,18 +1,16 @@
 ---
-name: egm-draft
+name: new-track
 license: Apache-2.0
 disable-model-invocation: true
 description: >-
   Drafts a design document section-by-section using the concepts brief from
-  egm-brainstorm (or user notes). This is the second step in the Elephant-Goldfish (EGM)
+  brainstorm (or user notes). This is the second step in the Zero-Context Audit Architecture
   feature flow. Use when you are ready to write a design doc after aligning on
   requirements + solution.
 ---
 
 # Design Drafting (Document Construction)
 
-When running in Codex or ChatGPT Work, first read [Codex integration](../../docs/codex.md).
-In Claude Code or Cowork, read `${CLAUDE_PLUGIN_ROOT}/docs/claude.md` first.
 
 This skill guides the user through drafting a technical design document based on
 the aligned problem and requirements from the brainstorm phase.
@@ -20,7 +18,7 @@ the aligned problem and requirements from the brainstorm phase.
 ## Execution Constraints (CRITICAL)
 
 1.  You **MUST** read and apply the
-    execution instructions in `resources/execution_instructions.md`.
+    execution instructions in `resources/templates/execution_instructions.md`.
 2.  **Artifact-First Delivery (MANDATORY)**: You are **STRICTLY FORBIDDEN** from
     presenting large proposals, drafts, summaries, or plans directly in the chat
     pane. You **MUST** write them directly to the working directory (or your
@@ -151,12 +149,12 @@ this strict generation order:
         `concepts_brief.md` is not found, check for `discussion_summary.md` in
         `./discussion_summary.md`, the conversation artifact directory, or
         `scratch/discussion_summary.md`. If found, ingest and parse the summary.
-        **Do NOT** prompt the user to start `/egm-brainstorm` or warn of
+        **Do NOT** prompt the user to start `/brainstorm` or warn of
         deprecation.
     *   **Priority 3: Interactive Chat Prompt**: If neither file exists, prompt
         the user in chat for the feature's problem statement, goals, and
-        technical context, or suggest that the user start the `egm-brainstorm`
-        skill with the host's command form (for example `/egm:egm-brainstorm`
+        technical context, or suggest that the user start the `brainstorm`
+        skill with the host's command form (for example `/egm:brainstorm`
         in Claude Code and agy CLI, or the skill picker in Codex).
 3.  **Verify State**: Parse the document. Present a quick confirmation to the
     user to ensure we are starting with the correct context.
@@ -171,7 +169,7 @@ this strict generation order:
     problem and user pain points.
 2.  **Draft Content**: Write "The Problem", "Overview", "Goals", and "Non-Goals"
     in clear, plain English Markdown following the design document template
-    (`references/design_doc.md`).
+    (`resources/templates/design_doc.md`).
 3.  **Focus**: Emphasize the *why* (the user need and business value) rather
     than the *how* (technical implementation).
 4.  **Write Draft Artifact (MANDATORY)**: Save this initial draft to
@@ -256,9 +254,9 @@ strictly:
 
 1.  **Reconcile against the Predecessor Context**: Do not grade the draft
     against the Zoom Out standard here. The session that wrote the draft agrees
-    with it; `/egm-review` Stage 5 runs that check from a fresh context.
+    with it; `/design-review` Stage 5 runs that check from a fresh context.
     Instead, re-read the context ingested at Step 1 and compare it with the
-    draft. No Goldfish can do this check, because no Goldfish reads the brief.
+    draft. No fresh-context reviewer can do this check, because no fresh-context reviewer reads the brief.
     *   **Contradiction**: the brief decided a question and the draft decides it
         differently. Report every one.
     *   **Addition**: the draft decides a question the brief did not raise.
@@ -308,14 +306,14 @@ strictly:
 
 4.  **Write doc**: Once finalized, write the contents of `design_draft.md` to
     the designated destination file at `<DESIGN_DIR>/<FEATURE>.md` using your
-    file-writing tool. Follow the [template](references/design_doc.md) for final
+    file-writing tool. Follow the [template](resources/templates/design_doc.md) for final
     structure if any adjustments are needed.
 
 5.  **Clean Formatting**: Ensure clean standard Markdown formatting, valid table
     syntax, and proper code block fences.
 
 6.  **Handoff**: Provide a clickable link to the finalized design and recommend
-    that the user review it by starting the `egm-review` skill on
+    that the user review it by starting the `design-review` skill on
     `<DESIGN_PATH>` with the host's command form (for example
-    `/egm:egm-review <DESIGN_PATH>` in Claude Code and agy CLI, or the skill
+    `/egm:design-review <DESIGN_PATH>` in Claude Code and agy CLI, or the skill
     picker in Codex).

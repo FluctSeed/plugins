@@ -5,13 +5,14 @@ metadata:
   version: "0.1.0"
 ---
 
-# Implement Skill (`/implement`)
+# Implement Skill (`implement`)
 
 > [!NOTE]
-> **Path Resolution (`${PLUGIN_ROOT}`):**
-> `${PLUGIN_ROOT}` refers to the root directory of this plugin (two levels above this file: `../../`, or `${CLAUDE_PLUGIN_ROOT}`). When calling filesystem or execution tools, resolve `${PLUGIN_ROOT}` to its absolute path.
+> **Plugin Root & Governance Rules (`${PLUGIN_ROOT}`)**
+> - `${PLUGIN_ROOT}` is the root directory of this plugin (`${CLAUDE_PLUGIN_ROOT}` if expanded by your harness, otherwise two directories above this `SKILL.md` file). Resolve `${PLUGIN_ROOT}` to its absolute path before calling file or shell tools.
+> - If your harness does not preload plugin `rules/*.md` automatically (Claude Code and Codex CLI), read `${PLUGIN_ROOT}/rules/lifecycle-workflow.md` and `${PLUGIN_ROOT}/rules/implementation-discipline.md` first.
 
-You are the **Implementation Lead** operating in **Phase 2 (Post-Gate Empirical Implementation Mode)**. Once a track has passed zero-context cross-verification and the **Stage 3 Human Gate**, your goal is to execute the tasks in `conductor/tracks/<track_id>/plan.md` with strict engineering discipline: minimal diffs, root-cause reproduction, behavioral tests, real runtime verification, and an auditable decision trail.
+You are the **Implementation Lead** operating in **Phase 2 (Post-Gate Empirical Implementation Mode)**. Verify the Stage 3 Human Gate lock, then execute tasks in `<TRACK_DIR>/plan.md` with minimal diffs, root-cause reproduction, behavioral tests, real runtime verification in `<TRACK_DIR>/verification.log`, and an append-only decision trail in `<TRACK_DIR>/decisions.tsv`.
 
 Reference materials:
 - Execution Mode Overview: `${PLUGIN_ROOT}/resources/tactics/execution-mode.md`
@@ -24,130 +25,76 @@ Reference materials:
 ## Operational Standards (Phase 2 Non-Negotiables)
 
 1. **Restate Goal & Smallest Expected Change:**
-   - In your first message on implementation, state in your own words the user's goal, the problem being solved, and the smallest code change you expect to meet it.
-   - Cite every `principle-*` leaf file (`${PLUGIN_ROOT}/resources/principles/principle-*.md`) that shaped a design or implementation choice.
+   - In your first message, state in your own words the user's goal, the problem being solved, and the smallest code change expected to meet it. Cite every `principle-*` leaf file (`${PLUGIN_ROOT}/resources/principles/principle-*.md`) shaping your choices.
 2. **Phase 2 Autonomy (`principle-never-block-on-the-human`):**
-   - Within the boundaries of the locked `spec.md` and `plan.md`, do not interrupt the developer with trivial permission questions on reversible steps.
-   - **Circuit Breaker Back to Phase 1:** Pause only for:
-     - Explicit Phase Checkpoints defined in `conductor/workflow.md`,
-     - Irreversible actions (destructive resets, external deploys), or
-     - Architectural deviations where `spec.md`, `tech-stack.md`, or `security-policy.md` must be amended.
+   - Within the boundaries of locked `spec.md` and `plan.md`, execute reversible code and test steps without interrupting the human.
+   - **Circuit Breaker Back to Phase 1:** Pause immediately for:
+     - Phase Checkpoints defined in `workflow.md`,
+     - External or irreversible side effects (external deploys, destructive git resets, external chat/ticket writes), or
+     - Any required change to `spec.md`, `plan.md` task structure, `tech-stack.md`, or `security-policy.md`.
 3. **Subagent Delegation (`${PLUGIN_ROOT}/agents/implementer.md`):**
-   - When delegating subtasks to a worker subagent, instruct it to read `${PLUGIN_ROOT}/agents/implementer.md` and `${PLUGIN_ROOT}/resources/tactics/execution-mode.md` first, and pass it consolidated scope (`spec.md`, `plan.md`, target files, and named data shape).
+   - When delegating scoped subtasks (`invoke_subagent` `implementer` in Antigravity, `Agent` `fluctseed:implementer` in Claude Code, or `spawn_agent` reading `${PLUGIN_ROOT}/agents/implementer.md` in Codex CLI), pass the resolved path to `${PLUGIN_ROOT}/resources/tactics/execution-mode.md` plus consolidated scope (`spec.md`, `plan.md` slice, target files, and named domain data shape).
 
 ---
 
-## 1. Handshake & Context Initialization
+## 1. Handshake, Track Selection & Stage 3 Human Gate Enforcement
 
-1. **Locate Index & Monorepo Discovery:**
-   - Verify `conductor/index.md` exists in current directory or monorepo module.
-   - If running in a monorepo, identify the target module's `conductor/` directory (e.g., `<module_path>/conductor/`) or monorepo root `conductor/`.
-   - If missing, halt and ask a **Yes/No question** to run `/setup` (`skills/setup/SKILL.md`).
-2. **Load & Verify Core Context:** Read `<CONDUCTOR_DIR>/index.md` and verify `product.md`, `tech-stack.md`, `workflow.md`, and `security-policy.md` (inheriting root policies if in a monorepo module).
+1. **Resolve `<CONDUCTOR_DIR>` & `<TRACK_DIR>`:**
+   - Discover conductors via `python3 "${PLUGIN_ROOT}/scripts/prepare_audit_context.py" --list-conductors` (preferring `./conductor` in the current working directory if present, or the module/track specified by the user).
+   - Parse `<CONDUCTOR_DIR>/tracks.md` to select the requested track or the first incomplete (`[~]` or `[ ]`) track. Set `<TRACK_DIR>` to `<CONDUCTOR_DIR>/tracks/<track_id>`.
+2. **Mandatory Stage 3 Human Gate Verification (`gate_check.py`):**
+   ```bash
+   python3 "${PLUGIN_ROOT}/scripts/gate_check.py" --verify "<TRACK_DIR>" --conductor-dir "<CONDUCTOR_DIR>"
+   ```
+   - **If exit code != 0 (`"ok": false`):**
+     - **Halt immediately.** Write zero production code.
+     - Report the exact `reasons` from stdout (`design_audit_report.md` missing, `human_gate_approved` false, or `spec.md` / `plan.md` structure modified after lock) and offer to run `${PLUGIN_ROOT}/skills/new-track/SKILL.md` Sections 4 and 5.
 
 ---
 
-## 2. Track Selection & Stage 3 Human Gate Enforcement
+## 2. Track Implementation Loop
 
-1. **Locate and Parse Tracks Registry:**
-   - Read `<CONDUCTOR_DIR>/tracks.md` to identify all tracks (`[ ]`, `[~]`, `[x]`) and their folder links. If missing or empty, search across discovered monorepo conductors (`python3 ${PLUGIN_ROOT}/scripts/prepare_audit_context.py --list-conductors`).
-2. **Select Target Track:**
-   - If the user specified a track name or path, match it directly.
-   - Otherwise, select the first incomplete (`[~]` or `[ ]`) track and confirm with the user if ambiguous.
-3. **MANDATORY Stage 3 Human Gate Check (`${PLUGIN_ROOT}/scripts/gate_check.py`):**
-   - Execute:
+1. **Mark Track In Progress & Record Base Commit:**
+   - Ensure `<TRACK_DIR>/metadata.json` records `"base_sha"` (`git rev-parse HEAD` prior to implementation commits if not already set).
+   - If the track is `[ ]` in `<CONDUCTOR_DIR>/tracks.md`, update it to `[~]`, commit `chore(tracks): mark track '<track_id>' as in progress`, and log run start:
      ```bash
-     python3 ${PLUGIN_ROOT}/scripts/gate_check.py --verify <track_id_or_path>
-     ```
-   - *Note: `gate_check.py` automatically searches across monorepo module conductors (`*/conductor/tracks/<track_id>`) if a plain ID is passed.*
-   - **If `ok` is `false` (exit code != 0):**
-     - **HALT IMMEDIATELY.** Do not write any code.
-     - Report the exact `reasons` from the JSON output (e.g., missing `design_audit_report.md`, `human_gate_approved` is `false`, or `spec.md` drifted after lock).
-     - Offer to run the Zero-Context Design Audit & Stage 3 Human Gate approval flow from `/new-track` (`skills/new-track/SKILL.md`, Sections 4–5) first.
-
----
-
-## 3. Track Implementation (Task State Machine + Playbook Execution)
-
-1. **Mark Track In Progress:**
-   - If the track is `[ ]` in `conductor/tracks.md`, update it to `[~]`, stage `conductor/tracks.md`, and commit:
-     `chore(tracks): Mark track '<track_description>' as in progress`
-   - Log the run start in `conductor/tracks/<track_id>/decisions.tsv`:
-     ```bash
-     ${PLUGIN_ROOT}/scripts/log.sh conductor/tracks/<track_id>/decisions.tsv "start" "started Phase 2 implementation for <track_id>" "Human Gate verified" "metadata.json" "in-progress"
+     "${PLUGIN_ROOT}/scripts/log.sh" "<TRACK_DIR>/decisions.tsv" "start" "started Phase 2 implementation for <track_id>" "Human Gate verified" "metadata.json" "in-progress"
      ```
 
-2. **Load Track & Playbook Context:**
-   - Read `conductor/tracks/<track_id>/spec.md`, `plan.md`, and `metadata.json`.
-   - Match the track's `type` in `metadata.json` to the corresponding playbook in `${PLUGIN_ROOT}/resources/playbooks/` and read it in full:
-     - `bug` ➔ `${PLUGIN_ROOT}/resources/playbooks/bug-fix.md` + `${PLUGIN_ROOT}/resources/tactics/tdd.md` + `${PLUGIN_ROOT}/resources/principles/principle-fix-root-causes.md`
-     - `feature` / `mvp` ➔ `${PLUGIN_ROOT}/resources/playbooks/feature.md` + `${PLUGIN_ROOT}/resources/principles/principle-model-the-domain.md`
-     - `refactor` ➔ `${PLUGIN_ROOT}/resources/playbooks/refactoring.md` + `${PLUGIN_ROOT}/resources/principles/principle-subtract-before-you-add.md`
-     - `perf` ➔ `${PLUGIN_ROOT}/resources/playbooks/perf-issue.md` + `${PLUGIN_ROOT}/resources/principles/principle-explain-the-number.md`
-   - Read `conductor/code_styleguides/*.md` and relevant directory `README.md` architecture contracts.
+2. **Load Context & Matching Playbook:**
+   - Read `<TRACK_DIR>/spec.md`, `<TRACK_DIR>/plan.md`, `<TRACK_DIR>/metadata.json`, active styleguides, `security-policy.md`, and affected directory `README.md` contracts (`python3 "${PLUGIN_ROOT}/scripts/prepare_audit_context.py" --conductor-dir "<CONDUCTOR_DIR>"`).
+   - Read the playbook matching `metadata.json` `"type"`:
+     - `bug` -> `${PLUGIN_ROOT}/resources/playbooks/bug-fix.md` + `tactics/tdd.md` + `principles/principle-fix-root-causes.md`
+     - `feature` / `mvp` -> `${PLUGIN_ROOT}/resources/playbooks/feature.md` + `principles/principle-model-the-domain.md`
+     - `refactor` -> `${PLUGIN_ROOT}/resources/playbooks/refactoring.md` + `principles/principle-subtract-before-you-add.md`
+     - `perf` -> `${PLUGIN_ROOT}/resources/playbooks/perf-issue.md` + `principles/principle-explain-the-number.md`
 
-3. **Execute Tasks Sequentially (`plan.md` Loop):**
-   For each pending task `- [ ] Task: ...` in `conductor/tracks/<track_id>/plan.md`:
-
-   - **Step 3.1 — Mark Task In Progress:**
-     Update the task in `plan.md` from `[ ]` to `[~]`.
-
-   - **Step 3.2 — Domain Shape & Boundary First (`principle-model-the-domain`, `principle-boundary-discipline`):**
-     Before writing logic, verify or define the core types, state machine transitions, and boundary parsers (`principle-type-system-discipline`). If crossing a module boundary with competing designs, apply `${PLUGIN_ROOT}/resources/tactics/architect.md` / `arena.md`.
-
-   - **Step 3.3 — Empirical Red Phase (`Reproduce First` & `Test Behavior, Not Implementation`):**
-     - **If Bug Fix (`playbooks/bug-fix.md`):** Reproduce the defect on the matching runtime surface first. Binary-search the cause and confirm the mechanism with runtime evidence (`principle-fix-root-causes`). Write the failing regression check (`${PLUGIN_ROOT}/resources/tactics/tdd.md`).
-     - **If Feature / Refactor:** Write the narrowest executable behavioral check (`principle-test-behavior-not-implementation`). Skip brittle mock-only tests when impractical (`tdd.md`) and use a deterministic verification script instead.
-     - Capture the failing-before (Red) check via:
+3. **Sequential Task State Machine (`[ ] -> [~] -> [x]`):**
+   For each pending task `- [ ] Task: ...` in `<TRACK_DIR>/plan.md` (preserving exact task wording so `plan_structure_sha256` remains intact):
+   - **3.1 Mark In Progress:** Change `[ ]` to `[~]` in `<TRACK_DIR>/plan.md`.
+   - **3.2 Domain Shape & Boundary First:** Define types, state transitions, and boundary validators (`principle-model-the-domain`, `principle-boundary-discipline`).
+   - **3.3 Empirical Red Check:** Reproduce the bug on the real surface or write a failing behavioral check (`principle-test-behavior-not-implementation`), recording output via:
+     ```bash
+     "${PLUGIN_ROOT}/scripts/capture-verify-log.sh" "<TRACK_DIR>" "<repro_or_test_cmd>"
+     ```
+   - **3.4 Minimal Green & Hygiene Pass:** Write the smallest diff (`principle-laziness-protocol`, `no-comments.md`, `unslop.md`) and prove passing runtime verification (exit code `0`):
+     ```bash
+     "${PLUGIN_ROOT}/scripts/capture-verify-log.sh" "<TRACK_DIR>" "CI=true <test_and_build_cmd>"
+     ```
+   - **3.5 Atomic Commit & Audit Trail:**
+     - Commit code changes (`<type>(<scope>): <imperative subject>`), Do NOT rebase commits already recorded in `plan.md` or `decisions.tsv`.
+     - Attach local git note (`git notes add -f -m "Task: <task_name> | Verified: <TRACK_DIR>/verification.log" HEAD`) and append to `decisions.tsv`:
        ```bash
-       ${PLUGIN_ROOT}/scripts/capture-verify-log.sh <track_id> "<test_or_repro_cmd>"
+       "${PLUGIN_ROOT}/scripts/log.sh" "<TRACK_DIR>/decisions.tsv" "<phase>" "<task_name>" "<why_and_principle>" "commit <short_sha>, verification.log" "tests green"
        ```
+     - Update the task checkbox in `<TRACK_DIR>/plan.md` from `[~]` to `[x] <short_sha>` and commit `chore(plan): mark task '<task_name>' complete`.
+   - **3.6 Phase Checkpoint:** At the end of each phase, run the full verification suite via `capture-verify-log.sh` and follow `workflow.md` checkpoint rules.
 
-   - **Step 3.4 — Minimal Green & Refactor Phase (`principle-laziness-protocol`):**
-     - Write the smallest production diff that solves the problem (`principle-subtract-before-you-add`, `principle-minimize-reader-load`).
-     - Keep zero narrating comments (`${PLUGIN_ROOT}/resources/tactics/no-comments.md`) and clean prose (`${PLUGIN_ROOT}/resources/tactics/unslop.md`).
-     - Run the verification command and capture the passing-after (Green) output in `conductor/tracks/<track_id>/verification.log`:
-       ```bash
-       ${PLUGIN_ROOT}/scripts/capture-verify-log.sh <track_id> "CI=true <test_or_verify_cmd>"
-       ```
-     - Confirm exit code is `0` (`principle-prove-it-works`).
-
-   - **Step 3.5 — Atomic Commit & Dual Audit Trail (`git notes` + `decisions.tsv`):**
-     - Stage the task's code changes and commit (`<type>(<scope>): <imperative subject>`).
-     - Obtain the commit SHA (`git log -1 --format="%H"`) and short SHA (`git log -1 --format="%h"`).
-     - Attach **Git Notes**:
-       ```bash
-       git notes add -m "Task: <task_name> | Why: <reason> | Verified: verification.log" <commit_hash>
-       ```
-     - Append a row to **Decision Trail (`decisions.tsv`)**:
-       ```bash
-       ${PLUGIN_ROOT}/scripts/log.sh conductor/tracks/<track_id>/decisions.tsv "<phase>" "<task_name>" "<why_and_principle_applied>" "commit <short_sha>, verification.log" "tests green"
-       ```
-     - Update the task in `conductor/tracks/<track_id>/plan.md` from `[~]` to `[x] <short_sha>` and commit:
-       `chore(plan): Mark task '<task_name>' as complete`
-
-   - **Step 3.6 — Phase Checkpoint Verification (at the end of each Phase):**
-     Follow the Phase Completion Verification and Checkpointing Protocol in `conductor/workflow.md`. Verify all changed files in the phase have behavioral checks, run the full phase test suite via `${PLUGIN_ROOT}/scripts/capture-verify-log.sh`, present the actionable manual verification steps to the user, record `[checkpoint: <short_sha>]` on the phase header in `plan.md`, and commit.
-
-4. **Finalize Track Status:**
-   - Once all tasks and phases in `plan.md` are marked `[x]`, update the track status in `conductor/tracks.md` from `[~]` to `[x]`, update `metadata.json` `"status": "implemented"`, and commit:
-     `chore(tracks): Mark track '<track_description>' as complete`
+4. **Finalize Track Status & Sync Contracts:**
+   - Mark the track `[x]` in `<CONDUCTOR_DIR>/tracks.md`, set `"status": "implemented"` in `<TRACK_DIR>/metadata.json`, update any affected directory `README.md` contracts (`Interface`, `Invariants`, `Side Effects`), and commit.
 
 ---
 
-## 4. Synchronize Project Documentation & Directory Architecture Contracts
+## 3. Completion & Handoff to `review`
 
-1. **Project Context Docs Sync:**
-   - Compare `conductor/tracks/<track_id>/spec.md` against `conductor/product.md`, `conductor/tech-stack.md`, and `conductor/product-guidelines.md`.
-   - If updates are needed, present the proposed diff to the user via a **Yes/No question**, apply approved edits, and commit:
-     `docs(context): Synchronize docs for track '<track_description>'`
-2. **Directory Contract Sync (`README.md`):**
-   - If the track added or modified public interfaces, invariants, or side effects in any directory containing a `README.md` architecture contract, update the contract's `Interface`, `Invariants`, and `Side Effects` sections citing the new `[file:symbol]` definitions.
-
----
-
-## 5. Completion & Handoff to `/review`
-
-1. Output a concise reply (short declarative sentences, consumer and maintainer impact, principles applied, and pointers to `decisions.tsv` and `verification.log`).
-2. Ask the user via a **Yes/No question** if they would like to run `/review` (`skills/review/SKILL.md`) now to perform the final triple verification (Runtime Proof/Deslop + Spec/Contract Drift Audit + Guideline/Security Review) and open a Git PR.
-3. If approved, invoke the `review` skill (`skills/review/SKILL.md`).
+Summarize changed files, principles applied, and pointers to `<TRACK_DIR>/decisions.tsv` and `<TRACK_DIR>/verification.log`, then ask a single Yes/No question offering to run `${PLUGIN_ROOT}/skills/review/SKILL.md`.

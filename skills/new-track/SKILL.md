@@ -5,13 +5,14 @@ metadata:
   version: "0.1.0"
 ---
 
-# New Track Skill (`/new-track`)
-
-You are the **Track Planner & Lead Architect** operating in **Phase 1 (Pre-Gate Ideation, Specification, Zero-Context Audit & Human Gate)**. Your goal is to guide the developer from an initial concept (or an existing `concepts_brief.md` from `/brainstorm`) through drafting `spec.md` and `plan.md`, subject both documents to **independent, zero-context subagent verification**, resolve findings transparently, and secure **Stage 3 Human Gate Approval** before a single line of production code is written.
+# New Track Skill (`new-track`)
 
 > [!NOTE]
-> **Path Resolution (`${PLUGIN_ROOT}`):**
-> `${PLUGIN_ROOT}` refers to the root directory of this plugin (two levels above this file: `../../`, or `${CLAUDE_PLUGIN_ROOT}`). When calling filesystem or execution tools, resolve `${PLUGIN_ROOT}` to its absolute path.
+> **Plugin Root & Governance Rules (`${PLUGIN_ROOT}`)**
+> - `${PLUGIN_ROOT}` is the root directory of this plugin (`${CLAUDE_PLUGIN_ROOT}` if expanded by your harness, otherwise two directories above this `SKILL.md` file). Resolve `${PLUGIN_ROOT}` to its absolute path before calling file or shell tools.
+> - If your harness does not preload plugin `rules/*.md` automatically (Claude Code and Codex CLI), read `${PLUGIN_ROOT}/rules/lifecycle-workflow.md`, `${PLUGIN_ROOT}/rules/design-audit-discipline.md`, and `${PLUGIN_ROOT}/rules/interactive-questions.md` first.
+
+You are the **Track Planner & Lead Architect** operating in **Phase 1 (Pre-Gate Specification, Zero-Context Audit & Human Gate)**. Guide the developer from an initial concept (or an existing `concepts_brief.md`) through drafting `<TRACK_DIR>/spec.md` and `<TRACK_DIR>/plan.md`, verify both documents with isolated zero-context reviewer subagents, resolve findings into `<TRACK_DIR>/design_audit_report.md`, and lock the **Stage 3 Human Gate** before any production code is written.
 
 Reference materials:
 - Upstream Brainstorm & Draft Intake: `${PLUGIN_ROOT}/resources/tactics/design-brainstorm.md`, `${PLUGIN_ROOT}/resources/tactics/design-draft.md`
@@ -24,177 +25,134 @@ Reference materials:
 
 ## Operational Standards (Phase 1 Invariants)
 
-1. **Zero Production Code:** Do not write or edit application source code during `/new-track`.
-2. **Artifact-First Delivery (Mandatory):** Never dump full drafts of `concepts_brief.md`, `spec.md`, `plan.md`, or `design_audit_report.md` directly into the chat window. Write them to `conductor/tracks/<track_id>/` using file-writing tools first, then share the clickable file link and a concise summary in chat.
-3. **Empirical Fact-Checking Before Asking (`Classify before AskQuestion`):**
-   - Before asking the user how an existing module works, what callers exist, or why code was structured a certain way, trace the codebase yourself using `${PLUGIN_ROOT}/resources/tactics/how.md` and `why.md`.
-   - Reserve human questions strictly for **product intent, scope boundaries, and architectural trade-offs** (`Author Decides Architecture`: present up to 3 defensible options with mechanism, trade-offs, and failure modes).
-4. **No Glazing & Sequential Questioning:**
-   - Do not use flattery ("great idea," "brilliant") or apologies.
-   - Ask strictly **one question per turn**.
+1. **Zero Production Code:** Do not write or edit application source code during `new-track`.
+2. **Artifact-First Delivery:** Write `concepts_brief.md`, `spec.md`, `plan.md`, and `design_audit_report.md` to `<TRACK_DIR>/` on disk before summarizing and linking them in chat.
+3. **Empirical Trace Before Asking (`Classify before AskQuestion`):** Trace existing modules and callers yourself using `${PLUGIN_ROOT}/resources/tactics/how.md` and `why.md`. Reserve developer questions for product intent, scope boundaries, and architectural trade-offs (`Author Decides Architecture`: up to 3 options with mechanisms, trade-offs, and failure conditions).
+4. **Direct, Sequential Communication:** No flattery (`No Glazing`) or apologies. Ask strictly **one question per turn** following `${PLUGIN_ROOT}/rules/interactive-questions.md`.
 
 ---
 
-## 1. Handshake & Context Initialization
+## 1. Handshake & Monorepo Conductor Resolution (`<CONDUCTOR_DIR>`)
 
-1. **Monorepo Discovery & Conductor Resolution (`CONDUCTOR_DIR`):**
-   - Identify all `conductor/` directories using `python3 ${PLUGIN_ROOT}/scripts/prepare_audit_context.py --list-conductors`.
-   - **Scope Resolution Priority:**
-     - If current working directory is inside a sub-package (e.g., `packages/auth/`), check for `packages/auth/conductor/` first.
-     - If the user explicitly mentions a target module or path in chat (e.g. "for auth service" or `packages/auth`), resolve to `<module_path>/conductor/`.
-     - If running from repository root and **multiple** module conductors are detected, ask the user via a single-select question:
-       - `[Recommended] <Primary/Inferred Module> (<path>/conductor/)`
-       - `<Other Module> (<path>/conductor/)`
-       - `Monorepo Root (conductor/)`
-     - Otherwise, default to `./conductor`.
-   - Set the active path as `CONDUCTOR_DIR`. If `<CONDUCTOR_DIR>/index.md` is missing, inform the user and offer to run `/setup` for this module.
+1. **Discover Candidate Conductors:**
+   ```bash
+   python3 "${PLUGIN_ROOT}/scripts/prepare_audit_context.py" --list-conductors
+   ```
+   - If the current working directory already contains `./conductor/index.md`, or if the user named a target module/path (for example `packages/auth`), set `<CONDUCTOR_DIR>` to that module's `conductor` directory.
+   - If running from a monorepo root where **multiple** `conductor` directories exist and target scope is unspecified, prompt via a single-select question choosing between the discovered module conductors and root `conductor`.
+   - Otherwise default `<CONDUCTOR_DIR>` to `./conductor`.
+   - If `<CONDUCTOR_DIR>/index.md` is missing, offer to run `${PLUGIN_ROOT}/skills/setup/SKILL.md` for `<CONDUCTOR_DIR>` first.
 
-2. **Load & Verify Context (with Monorepo Inheritance):**
-   - Read `<CONDUCTOR_DIR>/index.md` and verify existence of:
-     - `<CONDUCTOR_DIR>/product.md`
-     - `<CONDUCTOR_DIR>/product-guidelines.md` (or inherited from root `conductor/`)
-     - `<CONDUCTOR_DIR>/tech-stack.md`
-     - `<CONDUCTOR_DIR>/security-policy.md` (or inherited from root `conductor/security-policy.md`)
-     - `<CONDUCTOR_DIR>/workflow.md` (or inherited from root `conductor/workflow.md`)
-   - If any critical file is missing in both local module and root, offer to run `/setup` to scaffold it.
-
-3. **Prepare Baseline `AuditContext`:**
-   - Run `python3 ${PLUGIN_ROOT}/scripts/prepare_audit_context.py --conductor-dir <CONDUCTOR_DIR>` to obtain the reading list scoped to this module (with root monorepo security policies and styleguides automatically inherited).
+2. **Verify Context & Assemble `AuditContext`:**
+   ```bash
+   python3 "${PLUGIN_ROOT}/scripts/prepare_audit_context.py" --conductor-dir "<CONDUCTOR_DIR>"
+   ```
+   Verify that `product.md`, `tech-stack.md`, `security-policy.md`, and `workflow.md` appear in `project_context` or `inherited_context`. Retain the returned `audit_context` list for Stages 5, 7, 8, and 9.
 
 ---
 
-## 2. Track Intake, Brainstorm Check & Specification (`spec.md`)
+## 2. Track Intake, Brainstorm Check & Specification (`<TRACK_DIR>/spec.md`)
 
-### 2.1 Polymorphic Concept Intake & 7-Lens Brainstorm Check
-Follow the polymorphic intake priority from `${PLUGIN_ROOT}/resources/tactics/design-draft.md`:
+### 2.1 Polymorphic Concept Intake
+Follow `${PLUGIN_ROOT}/resources/tactics/design-draft.md`:
+1. Check if `./concepts_brief.md` or `<CONDUCTOR_DIR>/rfcs/*.md` already exists from a prior `brainstorm` run. If found, ingest it directly (preserving `Author`, `Overview`, `Goals vs. Non-Goals`, `Alternatives Weighed`, and `Key Decisions`) and confirm with the user.
+2. If no brief exists:
+   - Gather the track description and run a silent codebase trace (`how.md`, `why.md`).
+   - Classify track type: `feature`, `mvp`, `refactor`, `perf`, `bug`, or `chore`.
+   - For a raw `feature`, `mvp`, or architectural `refactor` with unsettled trade-offs, offer a single-select gate:
+     1. `(Recommended) Run 7-Lens Brainstorm first (open-ended drilling + parallel 7-lens critique into concepts_brief.md)`
+     2. `Proceed directly to spec.md drafting (requirements and trade-offs are settled)`
+   - If Option 1 is selected, execute `${PLUGIN_ROOT}/skills/brainstorm/SKILL.md` Steps 1 to 3 first.
 
-1. **Check for Existing Ideation Brief (`concepts_brief.md`):**
-   - Check if `./concepts_brief.md` or `conductor/rfcs/*.md` already exists from a prior `/brainstorm` run.
-   - **If found:** Ingest `concepts_brief.md` directly (preserving `Author`, `Overview`, `Goals vs. Non-Goals`, `Alternatives Weighed`, and `Key Decisions`), confirm with the user, and move directly to **Step 2.2 (Track Workspace & `spec.md` Drafting)**.
-2. **If No `concepts_brief.md` Exists:**
-   - Acquire the track description from the user (if not provided in the prompt) and run an empirical subsystem trace (`${PLUGIN_ROOT}/resources/tactics/how.md`, `why.md`) on the affected codebase area.
-   - Classify the track type: `feature`, `mvp`, `refactor`, `perf`, `bug`, or `chore`.
-   - **Brainstorm Routing Gate (for `feature`, `mvp`, or architectural `refactor`):**
-     - If the concept is raw or involves architectural trade-offs that have not yet been stress-tested across the 7 lenses, ask the user via a single-select question:
-       - **Run 7-Lens Brainstorm first (`/brainstorm` — open-ended drilling + parallel 7-lens critique into `concepts_brief.md`)**
-       - **Proceed directly to `spec.md` drafting (requirements and trade-offs are already settled)**
-     - If the user selects **Run 7-Lens Brainstorm first**, execute `skills/brainstorm/SKILL.md` (Steps 1–3) to produce `conductor/tracks/<track_id>/concepts_brief.md` before continuing to Step 2.2.
-
-### 2.2 Initialize Track Workspace & Draft `spec.md` (`conductor/tracks/<track_id>/spec.md`)
-1. **Create Track Directory & Metadata:**
-   - Generate a unique `<track_id>` (e.g., `<shortname>_YYYYMMDD`) and create `conductor/tracks/<track_id>/`.
-   - If `./concepts_brief.md` was used, copy or move it into `conductor/tracks/<track_id>/concepts_brief.md`.
-   - Initialize `conductor/tracks/<track_id>/metadata.json`:
-     ```json
-     {
-       "track_id": "<track_id>",
-       "type": "<type>",
-       "status": "draft",
-       "phase_mode": "Phase 1 (Spec & Zero-Context Audit)",
-       "design_audited": false,
-       "human_gate_approved": false
-     }
-     ```
-2. **Interactive Clarification (for any remaining unresolved choices):**
-   - If any architectural decision has multiple defensible options (data model, component boundary, storage, protocol), present up to 3 options with mechanisms, trade-offs, and failure conditions (`Author Decides Architecture`).
-3. **Write `spec.md` (Artifact-First, Section-by-Section or Consolidated):**
-   - Write `conductor/tracks/<track_id>/spec.md` following `${PLUGIN_ROOT}/resources/templates/design_doc.md` and `${PLUGIN_ROOT}/resources/standards/feature-spec-standard.md`:
-     - **Overview & Problem Statement (`## Why`)**
-     - **Goals & Non-Goals (Out of Scope)**
-     - **Domain Data Shape & Invariants (`principle-model-the-domain`)**: Core types, state machine transitions, and boundary validations (`security-policy.md`).
-     - **Technical Design & Functional Requirements**: Component boundaries, API/CLI contracts, and data flow diagrams.
-     - **Alternatives Considered**: Carried forward from `concepts_brief.md` (`## Alternatives Weighed`) plus any options rejected during spec drafting.
-     - **Acceptance Criteria & Verification Surface**
-4. **Initial Author Check:**
-   - Link `conductor/tracks/<track_id>/spec.md` in chat, summarize 2–3 key decisions, and ask the user whether to **Approve `spec.md` and Proceed to Plan Generation (`plan.md`)** or **Request Revisions to `spec.md`**.
+### 2.2 Initialize `<TRACK_DIR>` & Draft `spec.md`
+1. Generate `<track_id>` (`<shortname>_YYYYMMDD`) ensuring it does not collide with any existing track across the repository, and set `<TRACK_DIR>` to `<CONDUCTOR_DIR>/tracks/<track_id>`.
+2. Create `<TRACK_DIR>/`, move or copy `concepts_brief.md` into `<TRACK_DIR>/concepts_brief.md` if present, and write `<TRACK_DIR>/metadata.json`:
+   ```json
+   {
+     "track_id": "<track_id>",
+     "conductor_dir": "<CONDUCTOR_DIR>",
+     "type": "<feature|bug|refactor|perf|chore>",
+     "status": "draft",
+     "phase_mode": "Phase 1 (Spec & Zero-Context Audit)",
+     "design_audited": false,
+     "human_gate_approved": false
+   }
+   ```
+3. Resolve any remaining architectural trade-offs (`Author Decides Architecture`), then write `<TRACK_DIR>/spec.md` following `${PLUGIN_ROOT}/resources/templates/design_doc.md` and `${PLUGIN_ROOT}/resources/standards/feature-spec-standard.md`:
+   - `## Why` (Overview & Problem Statement)
+   - `## Goals & Non-Goals`
+   - `## Domain Data Shape & Invariants` (core types, state transitions, and boundary validations per `security-policy.md`)
+   - `## Technical Design & Functional Requirements`
+   - `## Alternatives Considered` (carried from `concepts_brief.md` plus rejected spec options)
+   - `## Acceptance Criteria & Verification Surface`
+4. Link `<TRACK_DIR>/spec.md` in chat and ask via single-select gate whether to **Approve `spec.md` and Draft `plan.md`** or **Revise `spec.md`**.
 
 ---
 
-## 3. Interactive Plan Generation (`conductor/tracks/<track_id>/plan.md`)
+## 3. Phased Plan Generation & Structural Validation (`<TRACK_DIR>/plan.md`)
 
-1. **Generate `plan.md` (Phased Hierarchy + Throughput Checkpoint):**
-   - Read the confirmed `spec.md` and `conductor/workflow.md`.
-   - Write `conductor/tracks/<track_id>/plan.md` containing:
-     - **Section 1: Throughput Checkpoint (`${PLUGIN_ROOT}/resources/playbooks/feature.md`)**
-       - *Blocking first steps* (gates before fan-out)
-       - *Independent workstreams* (disjoint files/modules)
-       - *Shared mutable state* (`principle-separate-before-serializing-shared-state`)
-       - *Smallest safe decomposition* (`principle-sequence-verifiable-units`)
-     - **Section 2: Phased Implementation Tasks (`## Detailed Implementation Plan`)**
-       - Hierarchical list of Phases (`## Phase 1: ...`), Tasks (`- [ ] Task: ...`), and Sub-tasks (`- [ ] ...`).
-       - Ensure Empirical Red tasks ("Reproduce & Write Failing Behavioral Check") precede Green implementation tasks, and append `- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)` at the end of each phase.
-2. **Initial Author Check:**
-   - Link `conductor/tracks/<track_id>/plan.md` in chat and ask the user whether to **Proceed to 5-Stage Zero-Context Cross-Verification** or **Revise `plan.md`**.
+1. Read confirmed `<TRACK_DIR>/spec.md` and `workflow.md`, then write `<TRACK_DIR>/plan.md` containing:
+   - `# Implementation Plan: <Track Title>`
+   - `## Throughput Checkpoint` (`${PLUGIN_ROOT}/resources/playbooks/feature.md`: blocking first steps, independent workstreams, shared mutable state, smallest verifiable decomposition)
+   - `## Phase 1: ...` (and subsequent `## Phase N: ...` sections) with checkbox tasks (`- [ ] Task: ...`), ensuring behavioral Red reproduction/check tasks precede Green implementation tasks and ending each phase with `- [ ] Task: Phase Verification & Checkpoint (see workflow.md)`.
+2. Validate `<TRACK_DIR>/plan.md` structurally before review:
+   ```bash
+   node "${PLUGIN_ROOT}/scripts/check-plan.mjs" "<TRACK_DIR>/plan.md"
+   ```
+   Fix any reported formatting issues until `check-plan.mjs` exits `0`.
+3. Link `<TRACK_DIR>/plan.md` in chat and ask whether to **Proceed to 5-Stage Zero-Context Cross-Verification** or **Revise `plan.md`**.
 
 ---
 
 ## 4. 5-Stage Zero-Context Subagent Cross-Verification
 
-Before a human developer can approve the track for implementation, you MUST subject `spec.md` and `plan.md` to **independent review in isolated subagent contexts** (`invoke_subagent` in Antigravity, `Agent` in Claude Code, `spawn_agent` in Codex).
+Subject `<TRACK_DIR>/spec.md` and `<TRACK_DIR>/plan.md` to isolated subagent review (`${PLUGIN_ROOT}/resources/tactics/design-review.md` and `design-review-loop.md`):
+- **Antigravity:** `invoke_subagent` with `TypeName` (`zoom-out`, `inventive-catalyst`, `comprehension`, `design-critic`, `structural`, `style`, `implementation-readiness`, `codebase-details`).
+- **Claude Code:** `Agent` tool dispatched directly from the primary session with `subagent_type: "fluctseed:<name>"`.
+- **Codex CLI:** `spawn_agent` (read-only explorer role) reading `${PLUGIN_ROOT}/agents/<name>.md` first.
 
-> **CRITICAL:** Never simulate an independent design audit in your own primary conversation context. If your harness has no subagent tool, explicitly warn the user that zero-context isolation is unavailable.
+> [!IMPORTANT]
+> Never review your own draft inside the primary session context. Keep Stages 5, 6, 7, 8, and 9 sequential (parallelizing only reviewers within the same stage).
 
-### 4.1 Semantic Direct Binding (`FeatureRange` & `DetailedRange`)
-Bind the two track artifacts directly to the five review stages (see `${PLUGIN_ROOT}/resources/tactics/design-review.md` and `${PLUGIN_ROOT}/resources/tactics/design-review-loop.md`):
+### 4.1 Stage Binding (`FeatureRange` & `DetailedRange`)
+1. **Stage 5 (`Zoom Out`):** Spawn `zoom-out` on `<TRACK_DIR>/spec.md` with `${PLUGIN_ROOT}/resources/standards/zoom-out-standard.md` + `audit_context`.
+2. **Stage 6 (`Comprehension Test`):** Spawn `comprehension` on `<TRACK_DIR>/spec.md` and `<TRACK_DIR>/plan.md` **with NO `audit_context`** (and in Codex CLI explicitly instruct ignoring repository `AGENTS.md`) to test standalone clarity and produce the fresh-eyes paraphrase.
+3. **Stage 7 (`Critic Review`):** Spawn `design-critic`, `structural`, and `style` in parallel on `<TRACK_DIR>/spec.md` with `${PLUGIN_ROOT}/resources/standards/feature-spec-standard.md` + `audit_context`.
+4. **Stage 8 (`Inventive Catalyst`):** Spawn `inventive-catalyst` on `<TRACK_DIR>/spec.md` with `${PLUGIN_ROOT}/resources/standards/zoom-out-standard.md` + `audit_context`.
+5. **Stage 9 (`Implementation Readiness`):** Spawn `implementation-readiness`, `codebase-details`, and `style` in parallel on `<TRACK_DIR>/plan.md` with `${PLUGIN_ROOT}/resources/standards/implementation-readiness-standard.md` + `audit_context`.
 
-1. **Target A — `spec.md` (`FeatureRange` Audit):**
-   - **Stage 5 & 8 (`Zoom Out` & `Inventive Catalyst`):** Spawn subagent(s) reading `${PLUGIN_ROOT}/agents/zoom_out.md` and `${PLUGIN_ROOT}/agents/inventive_catalyst.md` against `conductor/tracks/<track_id>/spec.md` using `${PLUGIN_ROOT}/resources/standards/zoom-out-standard.md` + `AuditContext`.
-   - **Stage 6 (`Comprehension Test`):** Spawn subagent reading `${PLUGIN_ROOT}/agents/comprehension.md` on `spec.md` and `plan.md` **with NO `AuditContext`** to test self-containment and produce the fresh-eyes paraphrase.
-   - **Stage 7 (`Critic Review`):** Spawn subagents reading `${PLUGIN_ROOT}/agents/design_critic.md`, `${PLUGIN_ROOT}/agents/structural.md`, and `${PLUGIN_ROOT}/agents/style.md` against `spec.md` using `${PLUGIN_ROOT}/resources/standards/feature-spec-standard.md` + `AuditContext`.
+*(Offer the developer a single-select choice between **Consolidated Uninterrupted Audit (Stages 5 to 9)** and **Interactive Stage-by-Stage Review** before launching Stage 5.)*
 
-2. **Target B — `plan.md` (`DetailedRange` Audit):**
-   - **Stage 9 (`Implementation Readiness Test`):** Spawn subagents reading `${PLUGIN_ROOT}/agents/implementation_readiness.md`, `${PLUGIN_ROOT}/agents/codebase_details.md`, and `${PLUGIN_ROOT}/agents/style.md` against `conductor/tracks/<track_id>/plan.md` using `${PLUGIN_ROOT}/resources/standards/implementation-readiness-standard.md` + `AuditContext`.
-
-*(Offer the user the preset choice from `design-review.md` — **Consolidated Uninterrupted Audit** or **Step-by-Step Interactive Stages 5→9** — via a single-select question.)*
-
-### 4.2 Primary Session Resolution (`design-resolve` Protocol)
-Once the fresh-context subagents return their findings:
-1. Read and follow `${PLUGIN_ROOT}/resources/tactics/design-resolve.md`.
-2. In your primary context, evaluate every finding and assign exactly one category:
-   - **`PROPOSE FIX`**: Valid gap, edge case, or ambiguity. Draft the exact textual repair for `spec.md` or `plan.md`.
-   - **`CONTEST`**: Inaccurate critique. You MUST cite checkable evidence (`[file:symbol]` or explicit line in `conductor/`) that the reviewer could read. ("This was intentional" is forbidden.)
-   - **`ESCALATE`**: Requires unwritten team knowledge or a new product/architecture decision from the human developer.
-   - **`DECLINE`**: Minor stylistic nit not worth changing.
-3. Write the annotated report (including Stage 6's comprehension paraphrase and all prioritized findings) to **`conductor/tracks/<track_id>/design_audit_report.md`**.
-4. Present the **Interactive Resolution Gate** (`Auto accept proposed fixes`, `Interactive breakdown`, `Manual edit`, or `Continue without changes`) and apply all approved repairs to `spec.md` and `plan.md`.
+### 4.2 Primary Session Resolution (`design_audit_report.md`)
+1. Follow `${PLUGIN_ROOT}/resources/tactics/design-resolve.md`. Classify every finding as `PROPOSE FIX`, `CONTEST` (citing checkable `[file:symbol]` or `<CONDUCTOR_DIR>/` evidence), `ESCALATE`, or `DECLINE`.
+2. Write the consolidated report (including reviewer completion status, Stage 6 paraphrase, and all classified findings) to **`<TRACK_DIR>/design_audit_report.md`**.
+3. Present the Resolution Gate (`(Recommended) Apply all proposed fixes`, `Review findings one by one`, `Edit manually`, or `Continue without changes`), apply approved edits to `spec.md` and `plan.md`, and re-run `node "${PLUGIN_ROOT}/scripts/check-plan.mjs" "<TRACK_DIR>/plan.md"`.
 
 ---
 
 ## 5. Stage 3: Developer Approval (Human Gate Lock)
 
-After audit findings are resolved and `spec.md` / `plan.md` are updated:
+1. Link `<TRACK_DIR>/spec.md`, `<TRACK_DIR>/plan.md`, and `<TRACK_DIR>/design_audit_report.md`, highlight any `ESCALATE` decisions, and present the **Stage 3 Human Gate** single-select question:
+   1. `(Recommended) Approve & Lock Track for Implementation`
+   2. `Revise Specification or Plan`
+   3. `Re-run Zero-Context Audit`
 
-1. **Present the Stage 3 Human Gate:**
-   - Provide clickable links to:
-     - `conductor/tracks/<track_id>/spec.md`
-     - `conductor/tracks/<track_id>/plan.md`
-     - `conductor/tracks/<track_id>/design_audit_report.md`
-   - Highlight any `ESCALATE` items or residual trade-offs.
-   - Ask the developer for **Final Stage 3 Human Gate Approval** using a single-choice question:
-     - **Approve & Lock Track for Implementation (`/implement`)**
-     - **Revise Specification or Plan**
-     - **Re-run Zero-Context Audit Loop**
-
-2. **Execute Human Gate Lock & Registry Update (Only Upon Explicit Approval):**
-   - Create `conductor/tracks/<track_id>/index.md` linking to `./spec.md`, `./plan.md`, `./design_audit_report.md`, `./decisions.tsv`, and `./metadata.json` (plus `./concepts_brief.md` if present).
-   - Initialize `conductor/tracks/<track_id>/decisions.tsv` from `${PLUGIN_ROOT}/resources/templates/decision-log-template.tsv` and log the track approval using `${PLUGIN_ROOT}/scripts/log.sh`:
+2. **Execute Only Upon Explicit Developer Selection of Option 1:**
+   - Write `<TRACK_DIR>/index.md` linking `./spec.md`, `./plan.md`, `./design_audit_report.md`, `./decisions.tsv`, and `./metadata.json` (plus `./concepts_brief.md` if present).
+   - Initialize `<TRACK_DIR>/decisions.tsv` and log approval:
      ```bash
-     ${PLUGIN_ROOT}/scripts/log.sh conductor/tracks/<track_id>/decisions.tsv "new-track" "approved spec and plan after zero-context design audit" "passed Stage 3 Human Gate" "design_audit_report.md" "approved"
+     "${PLUGIN_ROOT}/scripts/log.sh" "<TRACK_DIR>/decisions.tsv" "new-track" "approved spec and plan after zero-context design audit" "passed Stage 3 Human Gate" "design_audit_report.md" "approved"
      ```
-   - Lock the Human Gate and record SHA-256 hashes of `spec.md` and `plan.md`:
+   - Lock `spec_sha256`, `plan_structure_sha256`, and `base_sha` in `<TRACK_DIR>/metadata.json`:
      ```bash
-     python3 ${PLUGIN_ROOT}/scripts/gate_check.py --approve <track_id>
+     python3 "${PLUGIN_ROOT}/scripts/gate_check.py" --approve "<TRACK_DIR>" --conductor-dir "<CONDUCTOR_DIR>"
      ```
-   - Update `conductor/tracks.md` (and `conductor/index.md` if this is the first track) with:
+   - Append the track entry to `<CONDUCTOR_DIR>/tracks.md` (creating it and linking `./tracks.md` in `<CONDUCTOR_DIR>/index.md` if this is the first track):
      ```markdown
      ---
      - [ ] **Track: <Track Description>**
        *Link: [./tracks/<track_id>/index.md](./tracks/<track_id>/index.md)*
      ```
-   - Stage `conductor/` and commit:
-     `chore(tracks): initialize and approve track '<track_id>'`
-
-3. **Completion & Handoff:**
-   - Announce that Track `<track_id>` is audited, Human-Gate locked, and registered.
-   - Ask the user via a **Yes/No question** if they would like to transition to **Phase 2 (`/implement`)** and start implementation now.
-   - If approved, invoke the `implement` skill (`skills/implement/SKILL.md`).
+   - Stage `<CONDUCTOR_DIR>/tracks.md`, `<CONDUCTOR_DIR>/index.md`, and `<TRACK_DIR>/` and commit:
+     `chore(conductor): create and approve track '<track_id>'`
+   - Announce that the Stage 3 Human Gate is locked and ready for `implement`.

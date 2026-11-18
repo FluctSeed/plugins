@@ -3,12 +3,12 @@ Copyright 2026 Google LLC.
 SPDX-License-Identifier: Apache-2.0
 -->
 
-# egm-bootstrap README Templates
+# bootstrap-contracts README Templates
 
-Templates for the contract files that `egm-bootstrap` writes. `${target_filename}`
+Templates for the contract files that `bootstrap-contracts` writes. `${target_filename}`
 is the configured contract filename (default `README.md`).
 
-## 📄 Component Package (Peanuts) README Template
+## 📄 Component Package (Leaf Package) README Template
 
 ```markdown
 # [Component Name]

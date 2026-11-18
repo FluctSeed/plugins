@@ -1,9 +1,9 @@
 {
   "name": "fluctseed",
   "version": "0.1.0",
-  "description": "Spec-Driven and Empirical AI Engineering Platform across /setup, /brainstorm, /new-track, /implement, /review, /status, and /revert.",
+  "description": "Spec-driven and empirical AI engineering lifecycle across setup, brainstorm, new-track, implement, review, status, and revert.",
   "author": {
-    "name": "Fluctseed AI Platform Architecture Team"
+    "name": "FluctSeed"
   },
   "homepage": "https://github.com/FluctSeed/plugins",
   "repository": "https://github.com/FluctSeed/plugins",
@@ -13,22 +13,24 @@
   "interface": {
     "displayName": "Fluctseed AI Engineering Platform",
     "shortDescription": "Spec-driven lifecycle with zero-context design audits and empirical execution rigor",
-    "longDescription": "Provides a stateful track lifecycle (/setup, /brainstorm, /new-track, /implement, /review, /status, /revert) with zero-context subagent design verification, Stage 3 Human Gate locking, and empirical implementation, root-cause debugging, and verification discipline.",
-    "developerName": "Fluctseed AI Platform",
+    "longDescription": "Provides a stateful track lifecycle (setup, brainstorm, new-track, implement, review, status, revert) with zero-context subagent design verification, Stage 3 Human Gate locking, and empirical implementation, root-cause debugging, and verification discipline.",
+    "developerName": "FluctSeed",
     "brandColor": "#1B6EF3",
     "category": "Developer Tools",
     "capabilities": [
-      "Project initialization and directory architecture contracts (/setup)",
-      "7-lens ideation and hypothesis stress-testing (/brainstorm)",
-      "Specification drafting and zero-context subagent cross-verification (/new-track)",
-      "Disciplined implementation with playbooks, behavioral TDD, and decision trails (/implement)",
-      "Runtime verification, spec-to-code drift checks, code review, and PR creation (/review)"
+      "Project initialization and directory architecture contracts (setup)",
+      "7-lens ideation and hypothesis stress-testing (brainstorm)",
+      "Specification drafting and zero-context subagent cross-verification (new-track)",
+      "Disciplined implementation with playbooks, behavioral TDD, and decision trails (implement)",
+      "Runtime verification, spec-to-code drift checks, code review, and PR creation (review)",
+      "Multi-module monorepo progress and gate status dashboard (status)",
+      "Git-reconciled rollback with append-only audit trail preservation (revert)"
     ],
     "defaultPrompt": [
-      "/setup Initialize this repository with project context and directory architecture contracts.",
-      "/brainstorm Stress-test a new feature concept across 7 fresh-context lenses.",
-      "/new-track Plan a new feature and verify it with fresh-context reviewers.",
-      "/implement Execute the approved track plan under empirical engineering discipline."
+      "Initialize this repository with project context and directory architecture contracts.",
+      "Stress-test a new feature concept across 7 fresh-context lenses.",
+      "Plan a new feature and verify it with fresh-context reviewers.",
+      "Execute the approved track plan under empirical engineering discipline."
     ],
     "websiteURL": "https://github.com/FluctSeed/plugins",
     "supportURL": "https://github.com/FluctSeed/plugins/issues",

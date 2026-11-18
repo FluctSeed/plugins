@@ -1,37 +1,35 @@
 ---
-name: egm-bootstrap
+name: bootstrap-contracts
 license: Apache-2.0
 disable-model-invocation: true
 description: Bootstrap directory README.md files across a repository subtree.
 ---
 
-# EGM Peanuts and Hay Bootstrap (`egm-bootstrap`)
+# Fluctseed Package and Subsystem Contracts Bootstrap (`bootstrap-contracts`)
 
-When running in Codex or ChatGPT Work, first read [Codex integration](../../docs/codex.md).
-In Claude Code or Cowork, read `${CLAUDE_PLUGIN_ROOT}/docs/claude.md` first.
 
 ## Overview
 
 This skill automates the creation, correction, formatting, and correctness
-verification of Elephant-and-Goldfish Model (EGM) compliant `README.md` files
+verification of Zero-Context Audit Architecture compliant `README.md` files
 across a directory tree. It establishes clear architectural contracts
 (interfaces, invariants, and side effects) for both human developers and AI
 assistants.
 
-*   **Peanuts**: Leaf-level Component Package READMEs containing specific file
+*   **Leaf Package Contracts**: Leaf-level Component Package READMEs containing specific file
     contracts.
 *   **Hay**: Parent-level Repository Blueprints that roll up child interface
     contracts into high-altitude indexes.
 
 ## Delegation
 
-A Goldfish runs in a fresh context with no conversation history. Spawn each
+A fresh-context reviewer runs in a fresh context with no conversation history. Spawn each
 subagent with your harness's subagent tool (Antigravity: `invoke_subagent`; Claude Code: `Agent`; Codex: `spawn_agent`). Each subagent is defined in `agents/<file>.md`, and its
-frontmatter `name` (for example `egm-zoom-out`) is the subagent type to request
+frontmatter `name` (for example `zoom-out`) is the subagent type to request
 where your harness registers named subagents. Otherwise spawn a general-purpose
 subagent and tell it to read that persona file first. Pass the prompt verbatim
 and wait for the report. If your harness cannot nest subagents,
-use direct dispatch instead of the synthesizer. See `docs/harnesses.md`.
+use direct dispatch instead of the synthesizer. Follow `rules/lifecycle-workflow.md` and `rules/interactive-questions.md`.
 If your harness has no subagent tool, run the scout steps inline.
 
 ## Inputs
@@ -43,15 +41,14 @@ If your harness has no subagent tool, run the scout steps inline.
     subtree partition (Optional).
 *   **`target_filename`**: Target contract filename to generate or update
     (Optional, default: `"README.md"`). Supports alternate blueprint filenames
-    such as `"EGM.md"` when pre-existing human-maintained READMEs must not be
+    such as `"Fluctseed.md"` when pre-existing human-maintained READMEs must not be
     modified.
 
 ## Execution Constraints (CRITICAL)
 
 1.  **No Code Generation**: You are strictly limited to documentation. Do not
     write or refactor any functional source code.
-2.  **VCS Isolation**: Do not perform any version control commits (`git commit`,
-    `git add`). All filesystem changes must be written locally using standard
+2.  **Worker VCS Isolation**: Delegated documentation workers do not run `git commit` or `git add`; only the parent `setup` session stages and commits completed contracts. All filesystem changes must be written locally using standard
     file-writing tools. Tracking
     and submitting is deferred to the human user.
 3.  **Temporary File Isolation**: Each worker keeps its status, checkpoint,
@@ -105,7 +102,7 @@ If your harness has no subagent tool, run the scout steps inline.
     *   Ignore symbolic links to prevent infinite recursion.
     *   Ignore hidden/system directories (`.git`, `.antigravity`, `node_modules`,
         `venv`, `dist`, `build`, `third_party`).
-    *   Read `.gitignore` and `.egmignore` (if present) and ignore matching glob patterns.
+    *   Read `.gitignore` and `.gitignore` (if present) and ignore matching glob patterns.
     *   Preserve package and build manifests (`package.json`, `Cargo.toml`,
         `go.mod`, `pyproject.toml`, `*.sln`, `*.csproj`, `Makefile`, `BUILD`) in
         the discovery map to extract verification targets later.
@@ -191,8 +188,8 @@ If your harness has no subagent tool, run the scout steps inline.
             execution).
     *   **Spawn Unbounded Sub-Orchestrators**: For each partition subtree root,
         use your harness's subagent tool to spawn a parallel worker:
-        *   Subagent: `egm-bootstrap-orchestrator` (`agents/bootstrap_orchestrator.md`) (or a general-purpose subagent)
-        *   `Prompt`: "Run egm-bootstrap with path=`[path]`,
+        *   Subagent: `bootstrap-orchestrator` (`agents/bootstrap-orchestrator.md`) (or a general-purpose subagent)
+        *   `Prompt`: "Run bootstrap-contracts with path=`[path]`,
             is_worker=true, sub_tree_root=`[partition_root]`,
             target_filename=`[target_filename]`."
     *   **Unbounded Execution**: Spawn all Sub-Orchestrators in parallel without
@@ -205,9 +202,9 @@ If your harness has no subagent tool, run the scout steps inline.
 
 ### Step 4: Sub-Orchestrator Worker Flow
 
-1.  **Scout Registration**: Use a read-only `goldfish-explorer` scout. Where your harness supports defining subagents at runtime, register it with:
+1.  **Scout Registration**: Use a read-only `research` scout. Where your harness supports defining subagents at runtime, register it with:
 
-    *   `name`: `goldfish-explorer`
+    *   `name`: `research`
     *   `description`: `Read-only codebase explorer scout.`
     *   `system_prompt`: >- You are a read-only codebase explorer. Your task is
         to analyze the source files in the target directory and return a
@@ -231,7 +228,7 @@ If your harness has no subagent tool, run the scout steps inline.
         *   If `target_filename` exists, **do not overwrite it completely**. Instead,
             read its existing content.
         *   *Scout Scan Requirement*: Whether `target_filename` exists or not,
-            **always scan** the source code using the `goldfish-explorer` scout
+            **always scan** the source code using the `research` scout
             for `D` to compile the true code symbol boundary.
         *   *Legacy Extraction & Correction*: If `target_filename` exists, call the
             reasoning LLM with prompt: > "Analyze the following unstructured
@@ -241,17 +238,17 @@ If your harness has no subagent tool, run the scout steps inline.
             \"interface\": string[], \"invariants\": string[], \"side_effects\":
             string[] }." Merge these extracted symbols with the scout's code
             symbols. Use your file-editing tool (or your file-writing tool) to correct
-            and update the existing contract file to be EGM compliant while preserving
+            and update the existing contract file to be Fluctseed compliant while preserving
             developer notes and descriptions.
 
-    *   **Scout Spawning & Constraints**: Spawn `goldfish-explorer` for `D`.
+    *   **Scout Spawning & Constraints**: Spawn `research` for `D`.
 
         *   *Scout Constraints*: No per-directory or per-file byte cap; every
             non-test file in `D` is read in full. Bound each scout call to
             about **1,500 lines** of source instead: list top-level definitions
             (class/func/def/route/flag lines) with your search tool, cut the
             directory's files into chunks at those boundaries (never mid-body;
-            small files share a chunk), spawn one `goldfish-explorer` per
+            small files share a chunk), spawn one `research` per
             chunk in parallel, and merge their JSON. Give each chunk the
             file's imports and top-level definition list so it can judge
             visibility. Check build-manifest deps and `import` / `#include`
@@ -334,7 +331,7 @@ If your harness has no subagent tool, run the scout steps inline.
     the `subtree_index` array containing the `path`, `summary`, `interface`,
     `invariants`, and `side_effects` for every processed directory.
 
-4.  If `is_worker` is `true`, read the [Worker Return Interface Schema](references/worker-return.schema.json)
+4.  If `is_worker` is `true`, read the [Worker Return Interface Schema](resources/templates/worker-return.schema.json)
     relative to this skill directory, then return a matching JSON payload to
     the Root Orchestrator and terminate. If
     `is_worker` is `false` (sequential mode), proceed directly to **Step 5: Root
@@ -373,7 +370,7 @@ If your harness has no subagent tool, run the scout steps inline.
         title, metadata, and architectural overview at the top of the root
         contract file.
     *   Check if `path` itself contains any direct source files. If present,
-        spawn a `goldfish-explorer` scout for `path` to extract local symbols
+        spawn a `research` scout for `path` to extract local symbols
         and invariants, appending them under the optional `## Local Interface &
         Invariants` section.
     *   Compile the final root `target_filename` using the **Repository Root Blueprint
@@ -390,7 +387,7 @@ If your harness has no subagent tool, run the scout steps inline.
     MUST explicitly read every single created or modified contract file
     to verify its content. Do not skip any child contract files. Verify:
 
-    *   **EGM Compliance & Code Grounding**: Ensure `Interface`, `Invariants`,
+    *   **Fluctseed Compliance & Code Grounding**: Ensure `Interface`, `Invariants`,
         and `Side Effects` sections exist, cite real code symbols/flags/tables
         from the scout extraction, and contain zero speculative or unverified
         claims.
@@ -408,17 +405,17 @@ If your harness has no subagent tool, run the scout steps inline.
     a structured question tool, if your harness has one, or plain chat) to offer running a drift report
     on the generated documentation updates:
 
-    *   `question`: "Do you want to run the EGM Drift Report on the generated
+    *   `question`: "Do you want to run the Fluctseed Drift Report on the generated
         contract updates to check for consistency with the codebase?"
     *   `options`: `["(Recommended) Yes, run drift report on modified contracts",
         "No, skip drift review"]`
-    *   If the user selects "Yes", run the `egm-drift-report` skill targeting
+    *   If the user selects "Yes", run the `drift-report` skill targeting
         the modified contracts to verify both missing code coverage and
         doc-to-code hallucinations (verifying every documented method, route,
         enum, database table, and invariant against local source files and
         recording discrepancies in the drift report for human triage). (Note:
-        While `egm-drift-report` is often used for design documents, it can be
-        applied to EGM-compliant contracts as a variant).
+        While `drift-report` is often used for design documents, it can be
+        applied to Fluctseed-compliant contracts as a variant).
 
 6.  Terminate execution successfully.
 
@@ -427,6 +424,6 @@ If your harness has no subagent tool, run the scout steps inline.
 ## Templates
 
 Before writing any contract file, read the
-[README templates](references/templates.md) relative to this skill directory.
-It defines the **Component Package (Peanuts)**, **Repository Root (Blueprint /
+[README templates](resources/templates/contract_templates.md) relative to this skill directory.
+It defines the **Component Package (Leaf Package)**, **Repository Root (Blueprint /
 Hay)**, and **Intermediate Blueprint** README templates referenced above.

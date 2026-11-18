@@ -1,39 +1,36 @@
 ---
-name: egm-brainstorm
+name: brainstorm
 license: Apache-2.0
 disable-model-invocation: true
 description: >-
-  Interactive ideation and brainstorming skill for the Elephant &
-  Goldfish Model (EGM). Helps turn half-baked concepts into structured
+  Interactive ideation and brainstorming skill for the Zero-Context Audit Architecture. Helps turn half-baked concepts into structured
   hypotheses via clarifying questions, review, and iterative refinement.
   Produces an RFC summary for human review or more detailed design with
-  egm-draft.
+  new-track.
 ---
 
-# EGM Brainstorm: Interactive Multi-Lens Ideation & Refinement
+# Fluctseed Brainstorm: Interactive Multi-Lens Ideation & Refinement
 
-When running in Codex or ChatGPT Work, first read [Codex integration](../../docs/codex.md).
-In Claude Code or Cowork, read `${CLAUDE_PLUGIN_ROOT}/docs/claude.md` first.
 
 ## Overview
 
 This skill acts as the upstream conversational brainstorming engine for the
-Elephant-Goldfish Model (EGM). It turns "half-baked" or raw concepts into
+Zero-Context Audit Architecture. It turns "half-baked" or raw concepts into
 hypotheses by combining **interactive clarifying questions** with an automated
-**Goldfish review**. The outcome is an iteratively refined RFC summary
-(`concepts_brief.md`) that leads directly into `/egm-draft` or review with
+**fresh-context review**. The outcome is an iteratively refined RFC summary
+(`concepts_brief.md`) that leads directly into `/new-track` or review with
 peers.
 
 ## Delegation
 
-A Goldfish runs in a fresh context with no conversation history. Spawn each
+A fresh-context reviewer runs in a fresh context with no conversation history. Spawn each
 subagent with your harness's subagent tool (Antigravity: `invoke_subagent`; Claude Code: `Agent`; Codex: `spawn_agent`). Each subagent is defined in `agents/<file>.md`, and its
-frontmatter `name` (for example `egm-zoom-out`) is the subagent type to request
+frontmatter `name` (for example `zoom-out`) is the subagent type to request
 where your harness registers named subagents. Otherwise spawn a general-purpose
 subagent and tell it to read that persona file first. Pass the prompt verbatim
 and wait for the report. If your harness cannot nest subagents,
-use direct dispatch instead of the synthesizer. See `docs/harnesses.md`.
-If your harness has no subagent tool, stop and tell the user: a review in the same context is not a Goldfish review.
+use direct dispatch instead of the synthesizer. Follow `rules/lifecycle-workflow.md` and `rules/interactive-questions.md`.
+If your harness has no subagent tool, stop and tell the user: a review in the same context is not a fresh-context review.
 
 ## Execution Constraints (CRITICAL)
 
@@ -51,8 +48,8 @@ If your harness has no subagent tool, stop and tell the user: a review in the sa
     **STRICTLY FORBIDDEN** from using structured question tools (`ask_question`)
     or supplying pre-canned multiple-choice candidate answers during open-ended
     questioning.
-3.  **Parallel Goldfish Reviews**: You **MUST** evaluate the feature concept
-    across specialized Goldfish lenses simultaneously to prevent sequential bias
+3.  **Parallel fresh-context reviews**: You **MUST** evaluate the feature concept
+    across specialized fresh-context reviewer lenses simultaneously to prevent sequential bias
     and maximize critique breadth.
 4.  **Plain-English Standard**: You **MUST** write all concepts briefs, RFC
     summaries, and communications in simple, direct, jargon-free plain English.
@@ -87,7 +84,7 @@ If your harness has no subagent tool, stop and tell the user: a review in the sa
     turn, and provide clear, action-oriented options without `(Recommended)`
     prefixes.
 
-## The Goldfish Brainstorming Lenses
+## The fresh-context reviewer Brainstorming Lenses
 
 | Lens / Persona          | Core Objective          | Key Questions Challenged |
 | :---------------------- | :---------------------- | :----------------------- |
@@ -146,8 +143,8 @@ If your harness has no subagent tool, stop and tell the user: a review in the sa
     ```
 
     *   **Option 0: `Review with Goldfishes`**: The user confirms readiness.
-        Proceed immediately to Step 2 (Goldfish Review & Synthesis) to invoke
-        `egm-synthesizer`.
+        Proceed immediately to Step 2 (fresh-context review & Synthesis) to invoke
+        `synthesizer`.
     *   **Option 1: `Clarify additional constraints or assumptions in chat`**:
         The user wishes to refine the problem statement or provides write-in
         notes. Stay in Step 1, yield the turn in chat for details, incorporate
@@ -157,22 +154,22 @@ If your harness has no subagent tool, stop and tell the user: a review in the sa
 4.  **Proceed to Step 2 ONLY** after Option 0 is confirmed. Do NOT spawn
     subagents before this gate confirms readiness.
 
-### Step 2: Goldfish Review & Synthesis
+### Step 2: fresh-context review & Synthesis
 
 1.  **Delegate to Synthesizer Subagent**: Spawn the intermediate
-    **`egm-synthesizer`** agent (or parallel Goldfish subagents across the 7
+    **`synthesizer`** agent (or parallel fresh-context reviewer subagents across the 7
     specialized lenses if your harness cannot nest subagents):
-    *   Subagent: `egm-synthesizer` (`agents/synthesizer.md`)
+    *   Subagent: `synthesizer` (`agents/synthesizer.md`)
     *   `Prompt`: >- Conduct multi-lens brainstorm for feature concept:
         `[AnchoredFeatureHypothesis]`. Mode: `BRAINSTORM`. Reviewers:
-        `[egm-design, egm-codebase-details, egm-zoom-out, egm-comprehension,
-        egm-implementation-readiness, egm-structural, egm-inventive-catalyst]`.
-2.  **Synthesizer Execution**: The `egm-synthesizer` subagent launches the
-    parallel Goldfish reviewers across the specialized lenses (`egm-design`,
-    `egm-codebase-details`, `egm-zoom-out`, `egm-comprehension`,
-    `egm-implementation-readiness`, `egm-structural`,
-    `egm-inventive-catalyst`) with `Mode: BRAINSTORM`.
-3.  **Deduplication**: Collect the raw findings from the Goldfish reviewers,
+        `[design-critic, codebase-details, zoom-out, comprehension,
+        implementation-readiness, structural, inventive-catalyst]`.
+2.  **Synthesizer Execution**: The `synthesizer` subagent launches the
+    parallel fresh-context reviewers across the specialized lenses (`design-critic`,
+    `codebase-details`, `zoom-out`, `comprehension`,
+    `implementation-readiness`, `structural`,
+    `inventive-catalyst`) with `Mode: BRAINSTORM`.
+3.  **Deduplication**: Collect the raw findings from the fresh-context reviewers,
     deduplicate overlapping points, and format them into a cohesive analysis.
 4.  **Write/Update Artifact**: Format and write the synthesized brief to
     `concepts_brief.md` in the working directory (or your harness's artifact
@@ -201,22 +198,22 @@ The `concepts_brief.md` artifact follows this structure:
 
 ## Alternatives Weighed
 
-[Each option rejected during ideation, with the technical reason (e.g. "Rejected by author: <reason>"). Do not attribute a rejection to a maintainer without linking their issue, discussion, or PR. `/egm-draft` copies
+[Each option rejected during ideation, with the technical reason (e.g. "Rejected by author: <reason>"). Do not attribute a rejection to a maintainer without linking their issue, discussion, or PR. `/new-track` copies
 these into Alternatives Considered and has no other source for them.]
 
 ## Key Decisions & Staging for Next Steps
 
-[Key decisions resolved during ideation to be carried forward into `/egm-draft`.]
+[Key decisions resolved during ideation to be carried forward into `/new-track`.]
 ```
 
 ### Step 3: Interactive Iteration & Refinement Loop
 
 1.  **Notify & Highlight (No Chat Dumps)**: Notify the user in chat that
     `concepts_brief.md` has been updated (give its path). Highlight 2-3 key
-    objections or open risks raised by the Goldfish reviewers.
-2.  **Iterate**: Ask the user how they wish to address the Goldfish objections
+    objections or open risks raised by the fresh-context reviewers.
+2.  **Iterate**: Ask the user how they wish to address the fresh-context reviewer objections
     (e.g., pivoting the approach, narrowing scope, or adding constraints).
-3.  **Loop Back**: Repeat Steps 1 and 2 to re-run or update the Goldfish
+3.  **Loop Back**: Repeat Steps 1 and 2 to re-run or update the fresh-context reviewer
     analysis until the concept has survived scrutiny and the user is satisfied.
 
 ### Step 4: Finalize & Handoff
@@ -234,7 +231,7 @@ these into Alternatives Considered and has no other source for them.]
           "question": "Brainstorming complete. concepts_brief.md is finalized. Select next step:",
           "options": [
             "Publish concepts_brief.md as RFC for team feedback",
-            "Proceed to egm-draft (Initialize formal design document)",
+            "Proceed to new-track (Initialize formal design document)",
             "Continue refining concepts_brief.md in ideation mode",
             "Conclude brainstorming and keep brief for later"
           ],
@@ -247,20 +244,20 @@ these into Alternatives Considered and has no other source for them.]
     *   **Option 0: `Publish concepts_brief.md as RFC for team feedback`**:
         *   Write `concepts_brief.md` to `docs/designs/<feature_name>.md` using
             your file-writing tool.
-        *   Register the RFC in `docs/designs/SITEMAP.md` if it exists.
+        *   Register the RFC in `conductor/index.md` if it exists.
         *   Notify the user in chat that the RFC has been published and can be
             shared with the team for feedback before formal drafting. Remind the
             user that once feedback is gathered, a detailed design can be
-            initiated by starting the `egm-draft` skill on
+            initiated by starting the `new-track` skill on
             `docs/designs/<feature_name>.md` with the host's command form (for
-            example `/egm:egm-draft docs/designs/<feature_name>.md` in Claude
+            example `/egm:new-track docs/designs/<feature_name>.md` in Claude
             Code and agy CLI, or the skill picker in Codex).
-    *   **Option 1: `Proceed to egm-draft (Initialize formal design
+    *   **Option 1: `Proceed to new-track (Initialize formal design
         document)`**:
         *   Confirm that `concepts_brief.md` is saved in the working directory
             or artifact directory.
-        *   Instruct the user to start the `egm-draft` skill with the host's
-            command form (for example `/egm:egm-draft` in Claude Code and agy
+        *   Instruct the user to start the `new-track` skill with the host's
+            command form (for example `/egm:new-track` in Claude Code and agy
             CLI, or the skill picker in Codex), noting that it automatically
             ingests `concepts_brief.md` as its Priority 1 intake source.
     *   **Option 2: `Continue refining concepts_brief.md in ideation mode`**:

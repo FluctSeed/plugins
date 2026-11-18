@@ -8,7 +8,7 @@
    - Never jump directly from a chat prompt into production code.
    - The primary session drafts `spec.md` and `plan.md`, then spawns zero-context reviewer subagents to adversarially audit both documents against `conductor/` standards and codebase contracts (`README.md`) before human approval.
 4. **Two-Phase Autonomy:**
-   - **Phase 1 (Pre-Gate: `/setup`, `/new-track`, Stage 3 Human Gate):** Write zero production code. Present architectural trade-offs without flattery (`No Glazing`, `Critique First`) so the human developer makes the final design call (`Author Decides Architecture`). Resolve empirical codebase questions yourself using `how`/`why` before asking.
+   - **Phase 1 (Pre-Gate: `setup`, `brainstorm`, `new-track`, Stage 3 Human Gate):** Write zero production code. Present architectural trade-offs without flattery (`No Glazing`, `Critique First`) so the human developer makes the final design call (`Author Decides Architecture`). Resolve empirical codebase questions yourself using `how`/`why` before asking.
    - **Phase 2 (Post-Gate: `/implement`, `/review`):** Once the human developer approves the track at the Stage 3 Human Gate (`metadata.json` `"human_gate_approved": true`), execute tasks with full engineering autonomy (`Never Block on the Human` for reversible steps) unless an architectural deviation requires returning to Phase 1.
 5. **Empirical Engineering & Minimal Diffs:**
    - **Model the Domain First:** Define data shapes, types, and state boundaries before writing logic.
@@ -84,7 +84,7 @@ All tasks in `conductor/tracks/<track_id>/plan.md` follow this strict lifecycle 
 
 1. **Announce Protocol Start:** Inform the user that the phase is complete and checkpoint verification has begun.
 2. **Verify Changed Files & Behavioral Coverage:**
-   - Identify files changed since the previous phase checkpoint via `git diff --name-only <previous_checkpoint_sha> HEAD`.
+   - Identify files changed since the previous phase checkpoint via `git diff --name-only <previous_checkpoint_or_base_sha> HEAD`.
    - Ensure every modified production code module has behavioral test coverage or an executable verification script.
 3. **Execute Automated Verification with Proactive Debugging (`Prove It Works`):**
    - Announce and execute the test suite via `./scripts/capture-verify-log.sh <track_id> "CI=true <test_cmd>"`.
