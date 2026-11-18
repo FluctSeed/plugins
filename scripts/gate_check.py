@@ -15,13 +15,24 @@ import os
 import sys
 
 
-def resolve_track_dir(target: str) -> str:
+def resolve_track_dir(target: str, conductor_dir: str = None) -> str:
     if os.path.isdir(target):
         return target
+    if conductor_dir:
+        cand = os.path.join(conductor_dir, "tracks", target)
+        if os.path.isdir(cand):
+            return cand
     candidate = os.path.join("conductor", "tracks", target)
     if os.path.isdir(candidate):
         return candidate
-    raise FileNotFoundError(f"Track directory not found for '{target}' (checked '{candidate}')")
+    # Monorepo search: scan for any directory matching */conductor/tracks/<target>
+    for root, dirs, _ in os.walk(".", topdown=True):
+        dirs[:] = [d for d in dirs if d not in {".git", "node_modules", "dist", "build", "venv", ".venv", ".claude", ".codex", ".agent", ".grok"}]
+        if os.path.basename(root) == "tracks" and os.path.basename(os.path.dirname(root)) == "conductor":
+            cand = os.path.join(root, target)
+            if os.path.isdir(cand):
+                return cand
+    raise FileNotFoundError(f"Track directory not found for '{target}' (checked './conductor/tracks/{target}' and monorepo modules)")
 
 
 def sha256_file(path: str) -> str:
@@ -63,11 +74,12 @@ def main() -> int:
     group.add_argument("--approve", metavar="TRACK", help="Record developer Human Gate approval and lock spec/plan hashes")
     group.add_argument("--verify", metavar="TRACK", help="Verify track is approved for Phase 2 (/implement)")
     parser.add_argument("--approver", default="developer", help="Approver identifier")
+    parser.add_argument("--conductor-dir", default=None, help="Explicit path to conductor/ directory in a monorepo module")
     args = parser.parse_args()
 
     target = args.status or args.approve or args.verify
     try:
-        track_dir = resolve_track_dir(target)
+        track_dir = resolve_track_dir(target, conductor_dir=args.conductor_dir)
     except FileNotFoundError as exc:
         print(json.dumps({"ok": False, "error": str(exc)}, indent=2))
         return 1

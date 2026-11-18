@@ -37,17 +37,29 @@ Reference materials:
 
 ## 1. Handshake & Context Initialization
 
-1. **Locate Index:** Check for `conductor/index.md` in the project root.
-   - If missing, inform the user that project context is not initialized and ask a **Yes/No question** to run `/setup` (`skills/setup/SKILL.md`) now.
-2. **Load & Verify Context:** Read `conductor/index.md` and verify the existence of:
-   - `conductor/product.md`
-   - `conductor/product-guidelines.md`
-   - `conductor/tech-stack.md`
-   - `conductor/security-policy.md` (if present)
-   - `conductor/workflow.md`
-   - If any core file is missing, halt and offer to run `/setup` to repair the environment.
+1. **Monorepo Discovery & Conductor Resolution (`CONDUCTOR_DIR`):**
+   - Identify all `conductor/` directories using `python3 ${PLUGIN_ROOT}/scripts/prepare_audit_context.py --list-conductors`.
+   - **Scope Resolution Priority:**
+     - If current working directory is inside a sub-package (e.g., `packages/auth/`), check for `packages/auth/conductor/` first.
+     - If the user explicitly mentions a target module or path in chat (e.g. "for auth service" or `packages/auth`), resolve to `<module_path>/conductor/`.
+     - If running from repository root and **multiple** module conductors are detected, ask the user via a single-select question:
+       - `[Recommended] <Primary/Inferred Module> (<path>/conductor/)`
+       - `<Other Module> (<path>/conductor/)`
+       - `Monorepo Root (conductor/)`
+     - Otherwise, default to `./conductor`.
+   - Set the active path as `CONDUCTOR_DIR`. If `<CONDUCTOR_DIR>/index.md` is missing, inform the user and offer to run `/setup` for this module.
+
+2. **Load & Verify Context (with Monorepo Inheritance):**
+   - Read `<CONDUCTOR_DIR>/index.md` and verify existence of:
+     - `<CONDUCTOR_DIR>/product.md`
+     - `<CONDUCTOR_DIR>/product-guidelines.md` (or inherited from root `conductor/`)
+     - `<CONDUCTOR_DIR>/tech-stack.md`
+     - `<CONDUCTOR_DIR>/security-policy.md` (or inherited from root `conductor/security-policy.md`)
+     - `<CONDUCTOR_DIR>/workflow.md` (or inherited from root `conductor/workflow.md`)
+   - If any critical file is missing in both local module and root, offer to run `/setup` to scaffold it.
+
 3. **Prepare Baseline `AuditContext`:**
-   - Run `python3 ${PLUGIN_ROOT}/scripts/prepare_audit_context.py` to obtain the list of repository context files (`conductor/*.md`, `conductor/code_styleguides/*.md`, and directory `README.md` architecture contracts) that will be passed to fresh-context reviewers.
+   - Run `python3 ${PLUGIN_ROOT}/scripts/prepare_audit_context.py --conductor-dir <CONDUCTOR_DIR>` to obtain the reading list scoped to this module (with root monorepo security policies and styleguides automatically inherited).
 
 ---
 

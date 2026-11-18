@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
-"""Determines the next unblocked setup step in the project initialization workflow."""
+"""Determines the next unblocked setup step in the project initialization workflow,
+with monorepo module conductor support."""
 
+import argparse
 import json
 import os
 import sys
 
 
-def determine_resumption():
+def determine_resumption(conductor_dir: str = "conductor"):
     """Checks existing setup artifacts and returns the next unblocked step."""
-    conductor_dir = "conductor"
     files = [
         "product.md",
         "product-guidelines.md",
@@ -45,6 +46,7 @@ def determine_resumption():
             break
 
     return {
+        "conductor_dir": conductor_dir,
         "setup_complete": setup_complete,
         "checklist": checklist,
         "next_step": next_step,
@@ -52,6 +54,9 @@ def determine_resumption():
 
 
 if __name__ == "__main__":
-    result = determine_resumption()
+    parser = argparse.ArgumentParser(description="Determine setup resumption step")
+    parser.add_argument("--conductor-dir", default="conductor", help="Path to conductor directory")
+    args = parser.parse_args()
+    result = determine_resumption(args.conductor_dir)
     print(json.dumps(result, indent=2))
     sys.exit(0)

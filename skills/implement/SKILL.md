@@ -39,24 +39,27 @@ Reference materials:
 
 ## 1. Handshake & Context Initialization
 
-1. **Locate Index:** Verify `conductor/index.md` exists in the project root.
+1. **Locate Index & Monorepo Discovery:**
+   - Verify `conductor/index.md` exists in current directory or monorepo module.
+   - If running in a monorepo, identify the target module's `conductor/` directory (e.g., `<module_path>/conductor/`) or monorepo root `conductor/`.
    - If missing, halt and ask a **Yes/No question** to run `/setup` (`skills/setup/SKILL.md`).
-2. **Load & Verify Core Context:** Read `conductor/index.md` and verify that `product.md`, `tech-stack.md`, `workflow.md`, and `security-policy.md` exist.
+2. **Load & Verify Core Context:** Read `<CONDUCTOR_DIR>/index.md` and verify `product.md`, `tech-stack.md`, `workflow.md`, and `security-policy.md` (inheriting root policies if in a monorepo module).
 
 ---
 
 ## 2. Track Selection & Stage 3 Human Gate Enforcement
 
 1. **Locate and Parse Tracks Registry:**
-   - Read `conductor/tracks.md` to identify all tracks (`[ ]`, `[~]`, `[x]`) and their folder links. If missing or empty, announce that no tracks are available and HALT.
+   - Read `<CONDUCTOR_DIR>/tracks.md` to identify all tracks (`[ ]`, `[~]`, `[x]`) and their folder links. If missing or empty, search across discovered monorepo conductors (`python3 ${PLUGIN_ROOT}/scripts/prepare_audit_context.py --list-conductors`).
 2. **Select Target Track:**
-   - If the user specified a track name, match it in `conductor/tracks.md`.
+   - If the user specified a track name or path, match it directly.
    - Otherwise, select the first incomplete (`[~]` or `[ ]`) track and confirm with the user if ambiguous.
 3. **MANDATORY Stage 3 Human Gate Check (`${PLUGIN_ROOT}/scripts/gate_check.py`):**
    - Execute:
      ```bash
-     python3 ${PLUGIN_ROOT}/scripts/gate_check.py --verify <track_id>
+     python3 ${PLUGIN_ROOT}/scripts/gate_check.py --verify <track_id_or_path>
      ```
+   - *Note: `gate_check.py` automatically searches across monorepo module conductors (`*/conductor/tracks/<track_id>`) if a plain ID is passed.*
    - **If `ok` is `false` (exit code != 0):**
      - **HALT IMMEDIATELY.** Do not write any code.
      - Report the exact `reasons` from the JSON output (e.g., missing `design_audit_report.md`, `human_gate_approved` is `false`, or `spec.md` drifted after lock).

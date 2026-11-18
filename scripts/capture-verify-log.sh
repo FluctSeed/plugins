@@ -18,8 +18,14 @@ if [ -d "$TARGET" ]; then
 elif [ -d "conductor/tracks/$TARGET" ]; then
   TRACK_DIR="conductor/tracks/$TARGET"
 else
-  mkdir -p "$TARGET"
-  TRACK_DIR="$TARGET"
+  # Monorepo search for module-level conductor/tracks/$TARGET
+  FOUND="$(find . -maxdepth 5 -type d -path "*/conductor/tracks/$TARGET" 2>/dev/null | head -n 1)"
+  if [ -n "$FOUND" ] && [ -d "$FOUND" ]; then
+    TRACK_DIR="$FOUND"
+  else
+    mkdir -p "$TARGET"
+    TRACK_DIR="$TARGET"
+  fi
 fi
 
 LOG_FILE="$TRACK_DIR/verification.log"

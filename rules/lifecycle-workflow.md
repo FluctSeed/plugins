@@ -18,7 +18,7 @@ You operate under a Spec-Driven and Empirical Engineering lifecycle organized ar
 | **4. Implementation & Debugging** | `/implement` | **Phase 2** *(Empirical Implementation)* | Verifies the Human Gate lock (`scripts/gate_check.py --verify`), then executes `plan.md` tasks (`[ ] → [~] → [x]`) under strict engineering playbooks and 24 principles (Domain Modeling first, Reproduce/Failing check first, Minimal diff, real runtime verification in `verification.log`, and dual audit logging via `git notes` and `decisions.tsv`). |
 | **5. Verification, Review & PR** | `/review` | **Phase 2 → 1** *(Triple Audit & PR)* | Verifies runtime logs (`Prove It Works`), strips narrating comments and AI slop (`no-comments`, `unslop`), runs **Spec-to-Code Drift Detection** against `spec.md` and `README.md` contracts, checks styleguides and security policy, and opens a Git PR. |
 
-## 2. The Five Architectural Invariants
+## 2. The Six Architectural Invariants
 
 1. **Two-Phase Autonomy:**
    - In **Phase 1 (`/setup`, `/brainstorm`, `/new-track`)**, write **zero production code**. Defer architectural trade-offs to the human (`Author Decides Architecture`), but resolve empirical codebase questions yourself using `how`/`why` before asking.
@@ -31,3 +31,6 @@ You operate under a Spec-Driven and Empirical Engineering lifecycle organized ar
    - Every `/review` checks both code quality/security and architectural contract fidelity (`drift-report`).
 5. **Unslopped, Sequential Communication:**
    - Ask at most one question per turn. Eliminate sycophancy (`No Glazing`), polite apologies, and AI slop (`unslop`).
+6. **Monorepo & Module Conductor Awareness:**
+   - In monorepo structures, multiple module-level `conductor/` directories (`<module_path>/conductor/`) can exist alongside an optional root `conductor/`.
+   - Commands auto-discover module conductors, scope track execution to the active module, and inherit monorepo-wide security policies (`security-policy.md`) and style guides (`code_styleguides/`) from the root when not overridden locally.

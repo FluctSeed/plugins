@@ -32,3 +32,11 @@ This repository uses the **Fluctseed Spec-Driven and Empirical Engineering Archi
 - Model the domain data shape (`principle-model-the-domain`) and system boundaries (`principle-boundary-discipline`) before writing logic.
 - Reproduce bugs on the real surface first (`resources/playbooks/bug-fix.md`) and write behavioral checks (`principle-test-behavior-not-implementation`), avoiding brittle mock-only unit tests.
 - Capture real verification output in `conductor/tracks/<track_id>/verification.log` via `./scripts/capture-verify-log.sh` and log every decision in `conductor/tracks/<track_id>/decisions.tsv` via `./scripts/log.sh` alongside `git notes`.
+
+### 4. Monorepo & Module Conductor Awareness
+- Multiple module-level `conductor/` directories (`<module_path>/conductor/`) can exist in monorepos alongside an optional root `conductor/`.
+- Discovery commands (`prepare_audit_context.py --list-conductors`) identify module conductors automatically. Module conductors inherit root enterprise `security-policy.md` and `code_styleguides/` when not overridden locally.
+
+### 4. Monorepo & Module Conductor Awareness
+- Multiple module-level `conductor/` directories (`<module_path>/conductor/`) can exist in monorepos alongside an optional root `conductor/`.
+- Discovery commands (`prepare_audit_context.py --list-conductors`) identify module conductors automatically. Module conductors inherit root enterprise `security-policy.md` and `code_styleguides/` when not overridden locally.

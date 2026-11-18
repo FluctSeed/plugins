@@ -20,10 +20,10 @@ Reference material:
 
 ## 1. Handshake & Target Selection
 
-1. **Locate Index & Registry:** Verify `conductor/index.md` and `conductor/tracks.md` exist and are non-empty. If missing, halt and inform the user.
+1. **Locate Index & Registry:** Discover `conductor/` directories using `python3 ${PLUGIN_ROOT}/scripts/prepare_audit_context.py --list-conductors`. If running in a monorepo, inspect all discovered module `tracks.md` files and root `tracks.md`. If missing everywhere, halt and inform the user.
 2. **Interactive Target Selection:**
-   - **Path A (Direct Argument):** If the user specified a Track, Phase, or Task to revert, locate it in `conductor/tracks.md` or `conductor/tracks/<track_id>/plan.md` and confirm via a **Yes/No question**.
-   - **Path B (Guided Menu):** If no target was provided, scan `conductor/tracks.md` and each track's `plan.md`. Prioritize in-progress (`[~]`) items first, then the 3 most recently completed (`[x]`) Tasks/Phases. Present up to 4 options via a single-choice question.
+   - **Path A (Direct Argument):** If the user specified a Track, Phase, or Task to revert, locate it across `<CONDUCTOR_DIR>/tracks.md` or `<track_dir>/plan.md` and confirm via a **Yes/No question**.
+   - **Path B (Guided Menu):** If no target was provided, scan `tracks.md` files across discovered conductors and each track's `plan.md`. Prioritize in-progress (`[~]`) items first, then the 3 most recently completed (`[x]`) Tasks/Phases. Present up to 4 options via a single-choice question.
 
 ---
 

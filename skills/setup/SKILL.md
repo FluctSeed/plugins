@@ -35,7 +35,13 @@ Reference materials:
   - Check if a native structured question tool (`ask_question` or `AskUserQuestion`) is available. If present, use it with `len(questions) == 1`.
   - If interacting via plain text chat, ask questions **strictly one at a time** and wait for the user's response before proceeding.
   - Provide context-aware single-choice or multiple-choice options and always include an "Other (User-defined input)" option.
-- **Project Root Constraint:** Treat the current working directory as the project root. Store all project context artifacts within `conductor/` in the current project root.
+- **Monorepo & Module Scope:**
+  - In a standard single-package repository, store project context artifacts in `./conductor/`.
+  - In a **Monorepo** (e.g. `packages/`, `services/`, `apps/`, `modules/`, `pnpm-workspace.yaml`, `lerna.json`, `nx.json`, `turbo.json`, `Cargo.toml [workspace]`, `go.work`):
+    - Detect existing module structures and prompt the user if scope is unspecified:
+      - **Monorepo Root Context (`./conductor/`)**: Defines company-wide security policy, root tech stack, global style guides, and root repository blueprint.
+      - **Module-Specific Context (`<module_path>/conductor/`)**: Defines module-specific product definition, local stack, and local workflow (inheriting root security policy and style guides if omitted).
+    - When initializing a module-specific conductor, pass `--conductor-dir <module_path>/conductor` to `resume.py` and store context in `<module_path>/conductor/`.
 
 ---
 
@@ -55,12 +61,12 @@ Present a concise overview to the user adapted to their stated intent:
 
 Run the automated directory resumption script:
 ```bash
-python3 ${PLUGIN_ROOT}/scripts/resume.py
+python3 ${PLUGIN_ROOT}/scripts/resume.py [--conductor-dir <target_conductor_dir>]
 ```
 *(Fallback if running from skill directory: `python3 skills/setup/scripts/resume.py`)*
 
 Read the returned JSON object from `stdout` without mentioning the script path to the user:
-- If `setup_complete` is `true`, announce that `conductor/index.md` is already initialized, offer to run **Section 2.7 (Directory Architecture Contract Bootstrap)** if directory contracts need refreshing, or **HALT** execution.
+- If `setup_complete` is `true`, announce that `<conductor_dir>/index.md` is already initialized, offer to run **Section 2.7 (Directory Architecture Contract Bootstrap)** if directory contracts need refreshing, or **HALT** execution.
 - If partial setup exists, summarize completed artifacts using human-readable names (e.g., `tech-stack.md`) and ask a **Yes/No question** to resume from `next_step`.
 
 ---

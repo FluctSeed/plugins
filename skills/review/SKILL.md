@@ -25,14 +25,14 @@ Reference materials:
 
 ## 1. Handshake & Scope Identification
 
-1. **Locate Index:** Check for `conductor/index.md`. If missing, ask a **Yes/No question** to run `/setup`.
-2. **Load Core Context:** Read `conductor/index.md` and verify `tracks.md`, `product.md`, `tech-stack.md`, `workflow.md`, `product-guidelines.md`, `security-policy.md`, and all `.md` files in `conductor/code_styleguides/`.
+1. **Locate Index & Monorepo Conductor:** Check for `conductor/index.md` in current directory, monorepo root, or specific module (`python3 ${PLUGIN_ROOT}/scripts/prepare_audit_context.py --list-conductors`). If missing everywhere, ask a **Yes/No question** to run `/setup`.
+2. **Load Core Context (with Monorepo Inheritance):** Read `<CONDUCTOR_DIR>/index.md` and verify `tracks.md`, `product.md`, `tech-stack.md`, and `workflow.md`. Inherit root monorepo `security-policy.md` and `code_styleguides/` if not overridden locally.
 3. **Identify & Confirm Scope:**
-   - If the user provided a track name or scope argument, use it.
-   - Otherwise, inspect `conductor/tracks.md` for a recently completed (`[x]`) or in-progress (`[~]`) track and ask the user via a **Yes/No question** to confirm reviewing that track.
+   - If the user provided a track name or path, match it directly across discovered monorepo tracks.
+   - Otherwise, inspect tracks for a recently completed (`[x]`) or in-progress (`[~]`) track and confirm reviewing that track.
 4. **Retrieve Diff & Smart Chunking:**
-   - Parse `conductor/tracks/<track_id>/plan.md` to extract recorded commit SHAs and determine `<revision_range>`.
-   - Run `git diff --shortstat <revision_range> -- . ':!conductor'`.
+   - Parse `<track_dir>/plan.md` to extract recorded commit SHAs and determine `<revision_range>`.
+   - Run `git diff --shortstat <revision_range> -- . ':!conductor' ':!*/conductor'`.
    - If `< 300` lines, inspect the full diff in one pass. If `> 300` lines, confirm Iterative Review Mode with the user and inspect file by file.
 
 ---
