@@ -53,9 +53,9 @@ Reference materials:
 
 ## 2. Track Intake, Brainstorm Check & Specification (`<TRACK_DIR>/spec.md`)
 
-### 2.1 Polymorphic Concept Intake
-Follow `${PLUGIN_ROOT}/resources/tactics/design-draft.md`:
-1. Check if `./concepts_brief.md` or `<CONDUCTOR_DIR>/rfcs/*.md` already exists from a prior `brainstorm` run. If found, ingest it directly (preserving `Author`, `Overview`, `Goals vs. Non-Goals`, `Alternatives Weighed`, and `Key Decisions`) and confirm with the user.
+### 2.1 Polymorphic Concept Intake & Living Design Lookup
+Follow `${PLUGIN_ROOT}/resources/tactics/design-draft.md` (with `<MODULE_ROOT>` set to the parent directory of `<CONDUCTOR_DIR>`):
+1. Check if `./concepts_brief.md` or a `Status: Proposed` document in `<MODULE_ROOT>/docs/designs/*.md` already exists from a prior `brainstorm` run. Also inspect `<MODULE_ROOT>/docs/designs/README.md` and read any matching `Status: Active` `<MODULE_ROOT>/docs/designs/<subsystem>.md` so existing subsystem architecture and previously rejected alternatives are honored. Do **not** overwrite an `Active` document in `docs/designs/` during Phase 1 before code is implemented.
 2. If no brief exists:
    - Gather the track description and run a silent codebase trace (`how.md`, `why.md`).
    - Classify track type: `feature`, `mvp`, `refactor`, `perf`, `bug`, or `chore`.
@@ -65,12 +65,13 @@ Follow `${PLUGIN_ROOT}/resources/tactics/design-draft.md`:
    - If Option 1 is selected, execute `${PLUGIN_ROOT}/skills/brainstorm/SKILL.md` Steps 1 to 3 first.
 
 ### 2.2 Initialize `<TRACK_DIR>` & Draft `spec.md`
-1. Generate `<track_id>` (`<shortname>_YYYYMMDD`) ensuring it does not collide with any existing track across the repository, and set `<TRACK_DIR>` to `<CONDUCTOR_DIR>/tracks/<track_id>`.
+1. Generate `<track_id>` (`<shortname>_YYYYMMDD`) ensuring it does not collide with any existing track across the repository, identify the target `<subsystem>` slug (for `<MODULE_ROOT>/docs/designs/<subsystem>.md`), and set `<TRACK_DIR>` to `<CONDUCTOR_DIR>/tracks/<track_id>`.
 2. Create `<TRACK_DIR>/`, move or copy `concepts_brief.md` into `<TRACK_DIR>/concepts_brief.md` if present, and write `<TRACK_DIR>/metadata.json`:
    ```json
    {
      "track_id": "<track_id>",
      "conductor_dir": "<CONDUCTOR_DIR>",
+     "subsystem": "<subsystem>",
      "type": "<feature|mvp|bug|refactor|perf|chore>",
      "status": "draft",
      "phase_mode": "Phase 1 (Spec & Zero-Context Audit)",

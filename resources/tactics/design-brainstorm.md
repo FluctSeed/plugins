@@ -242,8 +242,7 @@ these into Alternatives Considered and has no other source for them.]
     ```
 
     *   **Option 0: `Publish concepts_brief.md as RFC for team feedback`**:
-        *   Write `concepts_brief.md` to `<CONDUCTOR_DIR>/rfcs/<feature_name>.md` (or `docs/designs/<feature_name>.md` when no `conductor/` exists) using
-            your file-writing tool. Do not add RFC or track links to `conductor/index.md`.
+        *   Write `concepts_brief.md` to `<MODULE_ROOT>/docs/designs/<feature_name>.md` (`docs/designs/<feature_name>.md` in single-package repos) with `Status: Proposed` and register it in `<MODULE_ROOT>/docs/designs/README.md`. Do not add transient track links to `conductor/index.md`.
         *   Notify the user in chat that the RFC has been published and can be
             shared with the team for feedback before formal drafting. Remind the
             user that once feedback is gathered, a detailed design can be

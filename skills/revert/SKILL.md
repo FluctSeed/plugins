@@ -32,7 +32,7 @@ Reference material:
 
 1. Extract recorded commit SHA(s) from the target Task/Phase in `<TRACK_DIR>/plan.md` (and `base_sha` from `<TRACK_DIR>/metadata.json` when reverting an entire Track).
 2. If a recorded SHA was rewritten, search `git log` for the matching commit subject and confirm the resolved SHA with the user.
-3. Include accompanying `chore(plan)` / `chore(tracks)` status commits, check for merge commits, and show the exact ordered commit list (`<sha> <subject>`) to the user.
+3. Include accompanying `chore(plan)`, `chore(tracks)`, `docs(designs)`, and `docs(conductor)` status and design-sync commits so rolling back a Track or Phase also reverts its `docs/designs/<subsystem>.md` changes, check for merge commits, and show the exact ordered commit list (`<sha> <subject>`) to the user.
 
 ---
 

@@ -103,9 +103,22 @@ Inspect the JSON output:
 
 ---
 
-## 3. Handshake Index (`<CONDUCTOR_DIR>/index.md`) & Commit
+## 3. Subsystem Design Index (`<MODULE_ROOT>/docs/designs/README.md`) & Handshake Index (`<CONDUCTOR_DIR>/index.md`)
 
-Write `<CONDUCTOR_DIR>/index.md` linking all active local (or inherited root) documents:
+Set `<MODULE_ROOT>` to the parent directory of `<CONDUCTOR_DIR>` (`.` when `<CONDUCTOR_DIR>` is `./conductor`, or `<module_path>` when `<CONDUCTOR_DIR>` is `<module_path>/conductor`).
+
+1. If `<MODULE_ROOT>/docs/designs/README.md` does not exist, create it to index permanent subsystem design documents:
+
+```markdown
+# Subsystem Design Documents
+
+Living subsystem architecture and decision documents (`Status`: `Proposed`, `Active`, or `Superseded`). Single-directory interfaces belong in code directory `README.md` contracts; cross-directory flows, domain data shapes, and rejected alternatives belong here.
+
+| Subsystem | Status | Summary | Code Paths |
+| :--- | :--- | :--- | :--- |
+```
+
+2. Write `<CONDUCTOR_DIR>/index.md` linking all active local (or inherited root) documents:
 
 ```markdown
 # Project Context
@@ -120,13 +133,14 @@ Write `<CONDUCTOR_DIR>/index.md` linking all active local (or inherited root) do
 - [Security Policy](./security-policy.md)
 - [Code Style Guides](./code_styleguides/)
 
-## Architecture Contracts
+## Architecture Contracts & Living Designs
 - [Module / Repository Blueprint](../README.md)
+- [Subsystem Design Documents](../docs/designs/README.md)
 ```
 
-1. Verify every linked path in `<CONDUCTOR_DIR>/index.md` resolves on disk. Never add `tracks/` or `tracks.md` links to `index.md`, `product.md`, `product-guidelines.md`, `tech-stack.md`, `security-policy.md`, or `workflow.md`; those 6 files hold timeless project state only.
-2. Stage `<CONDUCTOR_DIR>/` (and any approved `README.md` contracts) and commit:
-   `chore(setup): initialize project context, security policy, and workflow standards`
+3. Verify every linked path in `<CONDUCTOR_DIR>/index.md` resolves on disk. Never add `tracks/` or `tracks.md` links to `index.md`, `product.md`, `product-guidelines.md`, `tech-stack.md`, `security-policy.md`, or `workflow.md`; those 6 files hold timeless project state only.
+4. Stage `<CONDUCTOR_DIR>/`, `<MODULE_ROOT>/docs/designs/README.md`, and any approved `README.md` contracts and commit:
+   `chore(setup): initialize project context, design index, security policy, and workflow standards`
 
 ---
 

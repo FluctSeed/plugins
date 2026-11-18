@@ -14,7 +14,7 @@ metadata:
 
 You are the **Principal Code & Architecture Reviewer**. Route execution to one of three verification modes based on the caller's target:
 - **Mode A (Track Triple Verification & PR - Default):** Subject a completed or active track (`<TRACK_DIR>`) to Layer 1 (Runtime Proof + Decision Trail + `comment-auditor` + `interrogate`), Layer 2 (`drift_report.md`), Layer 3 (`code_styleguides/*.md` + `security-policy.md`), and Git PR creation (`opening-a-pr.md`).
-- **Mode B (Standalone Zero-Context Document Audit):** When given a `.md` design document or RFC outside `tracks/` (for example `docs/designs/auth.md` or `<CONDUCTOR_DIR>/rfcs/auth.md`), run `${PLUGIN_ROOT}/resources/tactics/design-review.md` (Stages 5 to 9 isolated zero-context subagent review) and `${PLUGIN_ROOT}/resources/tactics/design-resolve.md` directly without requiring an initialized track.
+- **Mode B (Standalone Zero-Context Document Audit):** When given a `.md` design document or RFC outside `tracks/` (for example `docs/designs/auth.md` or `<MODULE_ROOT>/docs/designs/auth.md`), run `${PLUGIN_ROOT}/resources/tactics/design-review.md` (Stages 5 to 9 isolated zero-context subagent review) and `${PLUGIN_ROOT}/resources/tactics/design-resolve.md` directly without requiring an initialized track.
 - **Mode C (Standalone Codebase & Contract Drift Audit):** When given a directory path or an explicit drift-detection request without a track target, run `${PLUGIN_ROOT}/resources/tactics/drift-report.md` directly against directory `README.md` contracts / design docs and live code, writing `drift_report.md`.
 
 Reference materials:
@@ -60,8 +60,8 @@ Reference materials:
 4. **Adversarial Diff Interrogation (`${PLUGIN_ROOT}/resources/tactics/interrogate.md`):**
    - Check for race conditions, partial failure states, non-idempotent mutations (`principle-make-operations-idempotent`), and boundary validation gaps (`principle-boundary-discipline`). Report only findings backed by a concrete failure scenario.
 
-### 2.2 Layer 2: Spec-to-Code & Contract Drift Audit (`<TRACK_DIR>/drift_report.md`)
-Follow `${PLUGIN_ROOT}/resources/tactics/drift-report.md` comparing the code diff against `<TRACK_DIR>/spec.md` and affected directory `README.md` contracts (`Interface`, `Invariants`, `Side Effects`). Write the result to **`<TRACK_DIR>/drift_report.md`** (recording `"No drift detected"` when clean).
+### 2.2 Layer 2: Spec, Living Design & Contract Drift Audit (`<TRACK_DIR>/drift_report.md`)
+Follow `${PLUGIN_ROOT}/resources/tactics/drift-report.md` comparing the code diff against `<TRACK_DIR>/spec.md`, `<MODULE_ROOT>/docs/designs/<subsystem>.md` (verifying that subsystem architecture and `Key Decisions & Alternatives Rejected` are synchronized with `<TRACK_DIR>/decisions.tsv`), and affected directory `README.md` contracts (`Interface`, `Invariants`, `Side Effects`). Write the result to **`<TRACK_DIR>/drift_report.md`** (recording `"No drift detected"` when clean).
 
 ### 2.3 Layer 3: Styleguides & Enterprise Security Audit
 1. **Style Compliance:** Check adherence to active and inherited `code_styleguides/*.md` (**High** severity on violation).
@@ -81,7 +81,7 @@ Write `<TRACK_DIR>/review_report.md` on disk first and share its clickable link 
 
 ## Verification Matrix
 - [ ] **Stage 3 Human Gate Lock**: [Verified / Failed]
-- [ ] **Spec & Contract Drift (`drift_report.md`)**: [Zero Drift / Drift Detected]
+- [ ] **Spec, Living Design (`docs/designs/`) & Contract Drift (`drift_report.md`)**: [Zero Drift / Drift Detected]
 - [ ] **Runtime Proof (`verification.log`)**: [Passed (Exit 0) / Failed] (`<cmd>`)
 - [ ] **Decision Trail (`decisions.tsv`)**: [Complete / Gaps Found]
 - [ ] **Code Hygiene (`comment-auditor` & `unslop`)**: [Pass / Needs Cleanup]
@@ -99,9 +99,9 @@ Write `<TRACK_DIR>/review_report.md` on disk first and share its clickable link 
 ## 4. Remediation, Track Cleanup & Git PR Creation
 
 1. **Remediation Gate (if findings exist):** Ask via single-select gate (`${PLUGIN_ROOT}/rules/interactive-questions.md`):
-   - `(Recommended) Apply Fixes` (apply code/comment/contract fixes, re-run `capture-verify-log.sh` to prove exit `0`, append `- [x] Task: Apply review suggestions <short_sha>` under `## Phase: Review Fixes` in `<TRACK_DIR>/plan.md`, and log to `<TRACK_DIR>/decisions.tsv`)
+   - `(Recommended) Apply Fixes` (apply code/comment/contract/`docs/designs/<subsystem>.md` fixes, re-run `capture-verify-log.sh` to prove exit `0`, append `- [x] Task: Apply review suggestions <short_sha>` under `## Phase: Review Fixes` in `<TRACK_DIR>/plan.md`, and log to `<TRACK_DIR>/decisions.tsv`)
    - `Manual Fix` (halt for developer edits)
    - `Proceed Without Changes` (only when zero Critical/High findings exist)
-2. **Track Registry Disposition:** Ask whether to `(Recommended) Keep in Registry` before PR merge, `Archive` to `<CONDUCTOR_DIR>/archive/<track_id>/`, or `Delete`.
+2. **Track Registry Disposition:** Confirm `<MODULE_ROOT>/docs/designs/<subsystem>.md` and `**/README.md` contracts are synchronized (so deleting `<TRACK_DIR>/` loses zero architectural or decision context), then ask whether to `(Recommended) Keep in Registry` before PR merge, `Archive` to `<CONDUCTOR_DIR>/archive/<track_id>/`, or `Delete`.
 3. **Git Pull Request (`${PLUGIN_ROOT}/resources/playbooks/opening-a-pr.md`):**
    - Verify the repository is on a named branch (not detached `HEAD`), draft `<TRACK_DIR>/pr_briefing.md` (`<= 40` lines: `## Why`, `## What changed`, `## Scope`, `## Tradeoffs`, `## Blast Radius`, `## Verification`), and upon developer confirmation create the PR (`gh pr create --title "..." --body-file "<TRACK_DIR>/pr_briefing.md"`).

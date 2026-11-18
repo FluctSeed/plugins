@@ -89,10 +89,16 @@ Reference materials:
        "${PLUGIN_ROOT}/scripts/log.sh" "<TRACK_DIR>/decisions.tsv" "<phase>" "<task_name>" "<why_and_principle>" "commit <short_sha>, verification.log" "tests green"
        ```
      - Update the task checkbox in `<TRACK_DIR>/plan.md` from `[~]` to `[x] <short_sha>` and commit `chore(plan): mark task '<task_name>' complete`.
-   - **3.6 Phase Checkpoint:** At the end of each phase, run the full verification suite via `capture-verify-log.sh` and follow `workflow.md` checkpoint rules.
+   - **3.6 Phase Checkpoint & Living Design Sync:** At the end of each phase, run the full verification suite via `capture-verify-log.sh`. Once verification exits `0`, if the phase added or altered subsystem architecture, domain data shapes, or settled architectural trade-offs recorded in `<TRACK_DIR>/decisions.tsv`, upsert those verified facts into `<MODULE_ROOT>/docs/designs/<subsystem>.md` (`Status: Active`, where `<MODULE_ROOT>` is the parent of `<CONDUCTOR_DIR>`) and `<MODULE_ROOT>/docs/designs/README.md`, then follow `workflow.md` checkpoint rules.
 
-4. **Finalize Track Status & Synchronize Project Context:**
+4. **Finalize Track Status & Synchronize Permanent Docs:**
    - Mark the track `[x]` in `<CONDUCTOR_DIR>/tracks.md` and set `"status": "implemented"` in `<TRACK_DIR>/metadata.json`.
+   - **Synchronize Living Subsystem Design (`<MODULE_ROOT>/docs/designs/<subsystem>.md`):**
+     - Unless the track is a pure `bug`/`chore` with zero architectural or decision changes, always create or upsert `<MODULE_ROOT>/docs/designs/<subsystem>.md` (`Status: Active`) and `<MODULE_ROOT>/docs/designs/README.md` from `<TRACK_DIR>/spec.md` and `<TRACK_DIR>/decisions.tsv`:
+       - `## Overview & Why`: Subsystem purpose and problem solved.
+       - `## Architecture & Domain Data Shape`: Cross-directory flows, protocols, and state transitions (keep single-directory function contracts in code `**/README.md` without duplicating every signature).
+       - `## Key Decisions & Alternatives Rejected`: Cumulative architectural decisions, implementation pivots from `decisions.tsv`, and rejected alternatives with technical rationale.
+     - Commit (`docs(designs): synchronize '<subsystem>' living design for '<track_id>'`).
    - Update any affected directory `README.md` architecture contracts (`Interface`, `Invariants`, `Side Effects`).
    - **Synchronize Permanent Project Context (`<CONDUCTOR_DIR>/`):**
      - Compare `<TRACK_DIR>/spec.md` against `<CONDUCTOR_DIR>/product.md`, `<CONDUCTOR_DIR>/tech-stack.md`, and `<CONDUCTOR_DIR>/product-guidelines.md` (when present locally):

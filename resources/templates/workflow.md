@@ -42,7 +42,7 @@ Immediately after completing the final task of a phase in `plan.md`:
 1. **Verify Phase Scope Coverage:** List code files changed since the phase start (`git diff --name-only <previous_checkpoint_or_base_sha> HEAD`) and confirm behavioral test coverage exists for modified logic.
 2. **Run Full Automated Verification Suite:** Announce and run the non-interactive build, lint, and test command (`CI=true ...`), recording the passing exit code `0`. If tests fail twice after targeted debugging, stop and report the root cause to the developer.
 3. **Present Actionable Manual Verification Steps:** Provide concrete commands, URLs, or API requests with expected observable outputs derived from `product.md` and `spec.md`, and pause for developer confirmation.
-4. **Stamp Checkpoint:** Record `[checkpoint: <short_sha>]` on the completed phase heading in `plan.md`, attach the verification summary via `git notes`, and commit the updated plan.
+4. **Synchronize Subsystem Design & Stamp Checkpoint:** If the completed phase added or modified cross-directory architecture, domain data shapes, or settled architectural trade-offs recorded in `decisions.tsv`, upsert those verified facts into `docs/designs/<subsystem>.md` (`Status: Active`) and `docs/designs/README.md`. Record `[checkpoint: <short_sha>]` on the completed phase heading in `plan.md`, attach the verification summary via `git notes`, and commit.
 
 ---
 
@@ -51,7 +51,7 @@ Immediately after completing the final task of a phase in `plan.md`:
 Before marking any task or phase complete:
 - [ ] Behavioral and regression tests pass (`exit 0` captured in verification log)
 - [ ] Code adheres to `code_styleguides/` and `security-policy.md`
-- [ ] Public interfaces, invariants, and side effects match directory `README.md` contracts
+- [ ] Public interfaces, invariants, and side effects match directory `README.md` contracts, and cross-directory architecture/decisions are current in `docs/designs/`
 - [ ] Type checks and linters pass with zero new suppressions
 - [ ] Decision trail (`decisions.tsv`) and `git notes` are updated
 

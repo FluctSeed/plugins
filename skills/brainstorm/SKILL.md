@@ -125,8 +125,8 @@ Present a single-select Handoff Gate (`${PLUGIN_ROOT}/rules/interactive-question
 - **Question:** `"concepts_brief.md is finalized. Select next step:"`
 - **Options:**
   1. `(Recommended) Proceed to new-track (draft spec.md and plan.md from concepts_brief.md)`
-  2. `Publish concepts_brief.md to <CONDUCTOR_DIR>/rfcs/ for team review first`
+  2. `Publish concepts_brief.md to <MODULE_ROOT>/docs/designs/<subsystem>.md (Status: Proposed) for team review first`
   3. `Continue refining concepts_brief.md`
   4. `Conclude brainstorming and keep concepts_brief.md for later`
 
-If Option 1 is selected, read and execute `${PLUGIN_ROOT}/skills/new-track/SKILL.md`.
+If Option 1 is selected, read and execute `${PLUGIN_ROOT}/skills/new-track/SKILL.md`. If Option 2 is selected, write `<MODULE_ROOT>/docs/designs/<subsystem>.md` with `Status: Proposed` (where `<MODULE_ROOT>` is the parent of `<CONDUCTOR_DIR>`, or `.` if uninitialized) and register its row in `<MODULE_ROOT>/docs/designs/README.md`.

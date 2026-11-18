@@ -140,9 +140,22 @@ def collect_audit_context(root_dir: str = None, conductor_dir: str = None, max_c
 
     module_root = os.path.dirname(resolved_conductor)
     scan_root = module_root if os.path.isdir(module_root) else repo_root
-    contracts, truncated = find_readme_contracts(scan_root, repo_root, max_contracts=max_contracts)
 
-    reading_list = core_docs + inherited_docs + styleguides + contracts
+    design_indices = []
+    candidate_design_roots = [scan_root]
+    if is_module_conductor and repo_root not in candidate_design_roots:
+        candidate_design_roots.append(repo_root)
+    for droot in candidate_design_roots:
+        d_idx = os.path.join(droot, "docs", "designs", "README.md")
+        if os.path.isfile(d_idx):
+            rel_idx = os.path.relpath(d_idx, repo_root)
+            if rel_idx not in design_indices:
+                design_indices.append(rel_idx)
+
+    raw_contracts, truncated = find_readme_contracts(scan_root, repo_root, max_contracts=max_contracts)
+    contracts = [c for c in raw_contracts if c not in design_indices]
+
+    reading_list = core_docs + inherited_docs + styleguides + design_indices + contracts
     return {
         "repo_root": repo_root,
         "conductor_dir": os.path.relpath(resolved_conductor, repo_root),
@@ -150,6 +163,7 @@ def collect_audit_context(root_dir: str = None, conductor_dir: str = None, max_c
         "project_context": core_docs,
         "inherited_context": inherited_docs,
         "styleguides": styleguides,
+        "design_index": design_indices,
         "architecture_contracts": contracts,
         "contracts_truncated": truncated,
         "audit_context": reading_list,
