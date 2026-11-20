@@ -2,7 +2,7 @@
 name: review
 description: Executes the Stage 5 Triple Verification & PR pipeline for tracks, or runs standalone Zero-Context Document Review (Stages 5-9) or standalone Spec/Contract Drift Reports when invoked on a design doc or directory.
 metadata:
-  version: "0.2.0"
+  version: "0.2.1"
 ---
 
 # Review & PR Skill (`review`)

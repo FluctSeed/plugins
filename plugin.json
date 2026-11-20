@@ -1,7 +1,7 @@
 {
   "name": "fluctseed",
   "displayName": "Fluctseed Corp.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Spec-driven and empirical AI engineering lifecycle across /setup, /brainstorm, /new-track, /implement, /review, /status, and /revert with zero-context design verification and runtime proof.",
   "author": {
     "name": "Fluctseed Corp.",

@@ -2,7 +2,7 @@
 name: new-track
 description: Plans a new track (feature, bug fix, refactor, or perf). Ingests concepts_brief.md from /brainstorm (or runs 7-lens brainstorming for raw feature concepts), drafts spec.md and plan.md, runs 5-stage zero-context subagent cross-verification (Stages 5-9) and finding resolution, and enforces the Stage 3 Human Gate approval lock.
 metadata:
-  version: "0.2.0"
+  version: "0.2.1"
 ---
 
 # New Track Skill (`new-track`)
