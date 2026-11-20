@@ -27,9 +27,10 @@ Reference materials:
 1. **Restate Goal & Smallest Expected Change:**
    - In your first message, state in your own words the user's goal, the problem being solved, and the smallest code change expected to meet it. Cite every `principle-*` leaf file (`${PLUGIN_ROOT}/resources/principles/principle-*.md`) shaping your choices.
 2. **Phase 2 Autonomy (`principle-never-block-on-the-human`):**
-   - Within the boundaries of locked `spec.md` and `plan.md`, execute reversible code and test steps without interrupting the human.
-   - **Circuit Breaker Back to Phase 1:** Pause immediately for:
-     - Phase Checkpoints defined in `workflow.md`,
+   - Within the boundaries of locked `spec.md` and `plan.md`, execute reversible code, test, and phase-checkpoint steps end-to-end without interrupting the human.
+   - **Circuit Breaker Back to Phase 1:** Pause immediately only for:
+     - A phase heading explicitly tagged `[human-gate]` by the developer in `plan.md` (untagged phase checkpoints verify and advance automatically),
+     - Verification failures that remain unresolved after two targeted root-cause debug cycles,
      - External or irreversible side effects (external deploys, destructive git resets, external chat/ticket writes), or
      - Any required change to `spec.md`, `plan.md` task structure, `tech-stack.md`, or `security-policy.md`.
 3. **Subagent Delegation (`${PLUGIN_ROOT}/agents/implementer.md`):**
@@ -89,7 +90,7 @@ Reference materials:
        "${PLUGIN_ROOT}/scripts/log.sh" "<TRACK_DIR>/decisions.tsv" "<phase>" "<task_name>" "<why_and_principle>" "commit <short_sha>, verification.log" "tests green"
        ```
      - Update the task checkbox in `<TRACK_DIR>/plan.md` from `[~]` to `[x] <short_sha>` and commit `chore(plan): mark task '<task_name>' complete`.
-   - **3.6 Phase Checkpoint & Living Design Sync:** At the end of each phase, run the full verification suite via `capture-verify-log.sh`. Once verification exits `0`, if the phase added or altered subsystem architecture, domain data shapes, or settled architectural trade-offs recorded in `<TRACK_DIR>/decisions.tsv`, upsert those verified facts into `<MODULE_ROOT>/docs/designs/<subsystem>.md` (`Status: Active`, where `<MODULE_ROOT>` is the parent of `<CONDUCTOR_DIR>`) and `<MODULE_ROOT>/docs/designs/README.md`, then follow `workflow.md` checkpoint rules.
+   - **3.6 Autonomous Phase Checkpoint & Living Design Sync:** At the end of each phase, run the full verification suite and live runtime surface check (`verification-harness.md` / `principle-prove-it-works`) via `capture-verify-log.sh`. Once verification exits `0`, if the phase added or altered subsystem architecture, domain data shapes, or settled architectural trade-offs recorded in `<TRACK_DIR>/decisions.tsv`, upsert those verified facts into `<MODULE_ROOT>/docs/designs/<subsystem>.md` (`Status: Active`, where `<MODULE_ROOT>` is the parent of `<CONDUCTOR_DIR>`) and `<MODULE_ROOT>/docs/designs/README.md`. Stamp `[checkpoint: <short_sha>]` on the phase heading in `<TRACK_DIR>/plan.md`, commit, and **advance immediately to the next phase without blocking on the human** unless that phase heading explicitly carries `[human-gate]` (in which case present the captured proof artifacts and pause for developer confirmation).
 
 4. **Finalize Track Status & Synchronize Permanent Docs:**
    - Mark the track `[x]` in `<CONDUCTOR_DIR>/tracks.md` and set `"status": "implemented"` in `<TRACK_DIR>/metadata.json`.

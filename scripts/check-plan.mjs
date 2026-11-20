@@ -46,7 +46,18 @@ for (let i = 0; i < lines.length; i++) {
 
   if (/^#\s+\S+/.test(line)) hasH1 = true;
   if (/^#{2,3}\s+.*Throughput Checkpoint/i.test(line)) hasThroughput = true;
-  if (/^##\s+Phase\b/i.test(line)) phaseCount++;
+  if (/^##\s+Phase\b/i.test(line)) {
+    phaseCount++;
+    const tags = [...line.matchAll(/\[([^\]]+)\]/g)].map((m) => m[1].trim());
+    for (const tag of tags) {
+      if (tag !== "human-gate" && !/^checkpoint:\s*`?[0-9a-f]{7,40}`?$/i.test(tag)) {
+        fail(
+          n,
+          `invalid phase heading tag '[${tag}]' (expected '[human-gate]' or '[checkpoint: <sha>]')`
+        );
+      }
+    }
+  }
 
   const bulletBracket = line.match(/^\s*-\s*\[([^\]]*)\](.*)$/);
   if (bulletBracket) {

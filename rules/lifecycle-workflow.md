@@ -22,7 +22,7 @@ You operate under a Spec-Driven and Empirical Engineering lifecycle organized ar
 
 1. **Two-Phase Autonomy**
    - In **Phase 1 (`setup`, `brainstorm`, `new-track`)**, write zero production code. Defer architectural trade-offs to the human (`Author Decides Architecture`), while answering empirical codebase questions yourself using `how`/`why` before asking.
-   - In **Phase 2 (`implement`, `review`)**, execute reversible implementation steps within the locked `spec.md` and `plan.md` without blocking on the human. Pause only at Phase Checkpoints, external/irreversible side effects, or when an invariant in `spec.md`, `tech-stack.md`, or `security-policy.md` must change.
+   - In **Phase 2 (`implement`, `review`)**, execute reversible implementation steps and phase checkpoints end-to-end within the locked `spec.md` and `plan.md` without blocking on the human (`principle-never-block-on-the-human`). Pause only on phases explicitly tagged `[human-gate]` in `plan.md`, external/irreversible side effects, verification failures unresolved after two root-cause debug cycles, or when an invariant in `spec.md`, `tech-stack.md`, or `security-policy.md` must change.
 2. **Semantic Direct Binding for Zero-Context Reviews**
    - Bind `<TRACK_DIR>/spec.md` to `FeatureRange` (Stages 5 to 8) and `<TRACK_DIR>/plan.md` to `DetailedRange` (Stage 9), supplying `<CONDUCTOR_DIR>/` documents and `README.md` contracts as `AuditContext` (except Stage 6 `comprehension`, which receives zero project context).
 3. **Pragmatic TDD & Real Verification**

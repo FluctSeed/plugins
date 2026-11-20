@@ -99,7 +99,7 @@ Follow `${PLUGIN_ROOT}/resources/tactics/design-draft.md` (with `<MODULE_ROOT>` 
 1. Read confirmed `<TRACK_DIR>/spec.md` and `workflow.md`, then write `<TRACK_DIR>/plan.md` containing:
    - `# Implementation Plan: <Track Title>`
    - `## Throughput Checkpoint` (`${PLUGIN_ROOT}/resources/playbooks/feature.md`: blocking first steps, independent workstreams, shared mutable state, smallest verifiable decomposition)
-   - `## Phase 1: ...` (and subsequent `## Phase N: ...` sections) with checkbox tasks (`- [ ] Task: ...`), ensuring behavioral Red reproduction/check tasks precede Green implementation tasks and ending each phase with `- [ ] Task: Phase Verification & Checkpoint (see workflow.md)`.
+   - `## Phase 1: ...` (and subsequent `## Phase N: ...` sections) with checkbox tasks (`- [ ] Task: ...`), ensuring behavioral Red reproduction/check tasks precede Green implementation tasks and ending each phase with `- [ ] Task: Phase Verification & Checkpoint (see workflow.md)`. Phases run uninterrupted without human pauses by default; append `[human-gate]` to a `## Phase N: ... [human-gate]` heading **only** when the developer explicitly requests a manual/visual review pause for that specific phase (never add `[human-gate]` unprompted).
 2. Validate `<TRACK_DIR>/plan.md` structurally before review:
    ```bash
    node "${PLUGIN_ROOT}/scripts/check-plan.mjs" "<TRACK_DIR>/plan.md"

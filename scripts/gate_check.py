@@ -99,7 +99,8 @@ def sha256_file(path: str) -> str:
 
 
 def sha256_plan_structure(path: str) -> str:
-    """Hashes plan.md structure while normalizing checkbox state transitions and commit SHA stamps."""
+    """Hashes plan.md structure while normalizing checkbox state transitions, task SHAs, and phase [checkpoint: <sha>] stamps.
+    Preserves [human-gate] markers on phase headings so gate tags cannot be silently added or removed after lock."""
     if not os.path.isfile(path):
         return ""
     with open(path, "r", encoding="utf-8") as f:
@@ -111,6 +112,8 @@ def sha256_plan_structure(path: str) -> str:
     normalized_lines = []
     for line in raw.splitlines():
         s = line.rstrip()
+        if re.match(r"^##\s+Phase\b", s, flags=re.I):
+            s = re.sub(r"\s*\[checkpoint:\s*`?[0-9a-f]{7,40}`?\]", "", s, flags=re.I).rstrip()
         m = re.match(r"^(\s*-\s*)\[[ ~xX]\](\s+.*)$", s)
         if m:
             body = re.sub(r"\s+`?[0-9a-f]{7,40}`?\s*$", "", m.group(2))

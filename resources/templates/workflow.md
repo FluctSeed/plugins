@@ -8,7 +8,7 @@
    - Specifications (`spec.md`) and implementation plans (`plan.md`) are drafted with full project context, then audited by isolated fresh-context reviewers against project standards and directory `README.md` contracts before developer approval.
 4. **Two-Phase Autonomy:**
    - **Phase 1 (Pre-Gate Ideation, Spec & Audit):** Write zero production code. Present architectural trade-offs without flattery so the developer makes the architectural call. Answer empirical codebase questions by reading code before asking.
-   - **Phase 2 (Post-Gate Implementation & Review):** After explicit Stage 3 Human Gate approval, execute reversible steps within the locked specification and plan without unnecessary prompts, pausing only at Phase Checkpoints, irreversible/external actions, or architectural deviations.
+   - **Phase 2 (Post-Gate Implementation & Review):** After explicit Stage 3 Human Gate approval, execute reversible tasks and phase checkpoints end-to-end within the locked specification and plan without blocking on the human. Pause only when a phase heading explicitly carries `[human-gate]`, before irreversible/external actions, when verification fails twice after root-cause debugging, or when an architectural/security invariant must change.
 5. **Empirical Engineering & Minimal Diffs:**
    - **Model the Domain First:** Define types, state transitions, and boundary parsers before writing control flow.
    - **Reproduce & Test Behavior:** Reproduce defects on the matching runtime surface first. Write behavioral checks asserting caller-observable outcomes rather than mock-heavy implementation wiring.
@@ -35,14 +35,15 @@
 
 ---
 
-## Phase Completion & Checkpointing Protocol
+## Phase Completion & Autonomous Checkpointing Protocol
 
 Immediately after completing the final task of a phase in `plan.md`:
 
 1. **Verify Phase Scope Coverage:** List code files changed since the phase start (`git diff --name-only <previous_checkpoint_or_base_sha> HEAD`) and confirm behavioral test coverage exists for modified logic.
-2. **Run Full Automated Verification Suite:** Announce and run the non-interactive build, lint, and test command (`CI=true ...`), recording the passing exit code `0`. If tests fail twice after targeted debugging, stop and report the root cause to the developer.
-3. **Present Actionable Manual Verification Steps:** Provide concrete commands, URLs, or API requests with expected observable outputs derived from `product.md` and `spec.md`, and pause for developer confirmation.
-4. **Synchronize Subsystem Design & Stamp Checkpoint:** If the completed phase added or modified cross-directory architecture, domain data shapes, or settled architectural trade-offs recorded in `decisions.tsv`, upsert those verified facts into `docs/designs/<subsystem>.md` (`Status: Active`) and `docs/designs/README.md`. Record `[checkpoint: <short_sha>]` on the completed phase heading in `plan.md`, attach the verification summary via `git notes`, and commit.
+2. **Run Full Automated Verification Suite:** Run the non-interactive build, lint, and test command (`CI=true ...`), recording the passing exit code `0` in `verification.log`. If verification fails twice after targeted root-cause debugging, stop and report the root cause to the developer.
+3. **Execute Live Runtime Surface Proof (`Prove It Works`):** Rather than delegating manual test steps to the developer, drive the real application surface directly (CLI/PTY, HTTP/API requests, or headless UI harness) and capture observable outputs and side effects in `verification.log`.
+4. **Synchronize Subsystem Design, Stamp Checkpoint & Advance:** If the completed phase added or modified cross-directory architecture, domain data shapes, or settled architectural trade-offs recorded in `decisions.tsv`, upsert those verified facts into `docs/designs/<subsystem>.md` (`Status: Active`) and `docs/designs/README.md`. Record `[checkpoint: <short_sha>]` on the completed phase heading in `plan.md`, attach the verification summary via `git notes`, commit, and **immediately advance to the next phase without pausing**.
+   - **Explicit `[human-gate]` Exception:** Pause for developer confirmation (sharing captured screenshots, responses, or log pointers) **only** when that specific phase heading in `plan.md` explicitly carries `[human-gate]`.
 
 ---
 
